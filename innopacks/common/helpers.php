@@ -799,6 +799,52 @@ if (! function_exists('theme_image')) {
     }
 }
 
+if (! function_exists('parse_filters')) {
+    /**
+     * @param  mixed  $params
+     * @return array
+     */
+    function parse_int_filters(mixed $params): array
+    {
+        if (is_array($params)) {
+            return $params;
+        }
+        $filters = explode('|', $params);
+
+        return array_filter($filters, function ($filter) {
+            return (int) ($filter) > 0;
+        });
+    }
+}
+
+if (! function_exists('parse_attr_filters')) {
+    /**
+     * @param  mixed  $params
+     * @return array|array[]
+     * @throws Exception
+     */
+    function parse_attr_filters(mixed $params): array
+    {
+        if (is_array($params)) {
+            return $params;
+        }
+
+        $attributes = explode('|', $params);
+
+        return array_map(function ($item) {
+            $itemArr = explode(':', $item);
+            if (count($itemArr) != 2) {
+                throw new \Exception('Invalid attribute parameters!');
+            }
+
+            return [
+                'attr'  => $itemArr[0],
+                'value' => explode(',', $itemArr[1]),
+            ];
+        }, $attributes);
+    }
+}
+
 if (! function_exists('innoshop_version')) {
     /**
      * Generate an asset path for the application.

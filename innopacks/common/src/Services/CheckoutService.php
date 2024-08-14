@@ -92,7 +92,11 @@ class CheckoutService extends BaseService
             return $this->cartList;
         }
 
-        return $this->cartList = CartService::getInstance($this->customerID, $this->guestID)->getCartList();
+        $filters = [
+            'selected' => true,
+        ];
+
+        return $this->cartList = CartService::getInstance($this->customerID, $this->guestID)->getCartList($filters);
     }
 
     /**
@@ -250,6 +254,8 @@ class CheckoutService extends BaseService
      */
     public function getCheckoutResult(): array
     {
+        $amount = $this->getTotal();
+
         return [
             'cart_list'        => $this->getCartList(),
             'address_list'     => $this->getAddressList(),
@@ -257,7 +263,9 @@ class CheckoutService extends BaseService
             'billing_methods'  => BillingService::getInstance()->getMethods(),
             'checkout'         => $this->getCheckoutData(),
             'fee_list'         => $this->getFeeList(),
-            'total'            => $this->getTotal(),
+            'total'            => $amount,
+            'amount'           => $amount,
+            'amount_format'    => currency_format($amount),
             'is_virtual'       => $this->checkIsVirtual(),
         ];
     }
@@ -306,7 +314,7 @@ class CheckoutService extends BaseService
             DB::commit();
 
             $this->checkout->delete();
-            CartService::getInstance($this->customerID)->getCartBuilder()->delete();
+            CartService::getInstance($this->customerID)->getCartBuilder(['selected' => true])->delete();
 
             return $order;
         } catch (Exception $e) {
