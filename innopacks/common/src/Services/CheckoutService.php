@@ -191,15 +191,52 @@ class CheckoutService extends BaseService
     public function getCheckoutData(): array
     {
         if ($this->checkoutData) {
+            $this->validateCheckoutData();
+
             return $this->checkoutData;
         }
 
+        return $this->checkoutData = $this->freshCheckoutData();
+    }
+
+    /**
+     * @return array
+     * @throws Throwable
+     */
+    public function freshCheckoutData(): array
+    {
         $checkout     = $this->getCheckout();
         $checkoutData = (new CheckoutSimple($checkout))->jsonSerialize();
 
         $checkoutData['shipping_quote_name'] = Shipping::getInstance($this)->getShippingQuoteName($checkout->shipping_method_code);
 
-        return $this->checkoutData = $checkoutData;
+        return $checkoutData;
+    }
+
+    /**
+     * @return void
+     * @throws Throwable
+     */
+    public function validateCheckoutData(): void
+    {
+        $shippingMethods = ShippingService::getInstance($this)->getMethods();
+        $billingMethods  = BillingService::getInstance()->getMethods();
+
+        $defaultShippingCode = $shippingMethods[0]['quotes'][0]['code'] ?? '';
+        foreach ($shippingMethods as $shippingMethod) {
+            foreach ($shippingMethod['quotes'] as $quote) {
+                if ($this->checkoutData['shipping_method_code'] != $quote['code']) {
+                    $this->updateValues(['shipping_method_code' => $defaultShippingCode]);
+                }
+            }
+        }
+
+        $billingCodes = collect($billingMethods)->pluck('code')->toArray();
+        if (! in_array($this->checkoutData['billing_method_code'], $billingCodes)) {
+            $this->updateValues(['billing_method_code' => $billingMethods[0]['code'] ?? '']);
+        }
+
+        $this->checkoutData = $this->freshCheckoutData();
     }
 
     /**
