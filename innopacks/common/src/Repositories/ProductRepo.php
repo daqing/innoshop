@@ -22,7 +22,7 @@ use Throwable;
 class ProductRepo extends BaseRepo
 {
     /**
-     * @param array $filters
+     * @param  array  $filters
      * @return LengthAwarePaginator
      * @throws Exception
      */
@@ -349,7 +349,7 @@ class ProductRepo extends BaseRepo
     }
 
     /**
-     * @param int $limit
+     * @param  int  $limit
      * @return mixed
      * @throws Exception
      */
@@ -364,7 +364,7 @@ class ProductRepo extends BaseRepo
     }
 
     /**
-     * @param int $limit
+     * @param  int  $limit
      * @return mixed
      * @throws Exception
      */

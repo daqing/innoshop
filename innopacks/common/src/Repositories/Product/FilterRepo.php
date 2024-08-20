@@ -69,7 +69,8 @@ class FilterRepo
         $brands = BrandSimple::collection(BrandRepo::getInstance()->all())->jsonSerialize();
 
         $builder = clone $this->builder;
-        $totals  = $builder->select('brand_id', DB::raw('count(*) as total'))
+        $totals  = $builder->forPage(1)
+            ->select('brand_id', DB::raw('count(*) as total'))
             ->groupBy('brand_id')
             ->pluck('total', 'brand_id');
 
@@ -93,7 +94,8 @@ class FilterRepo
     {
         $attributes = AttributeRepo::getInstance()->getItems();
         $builder    = clone $this->builder;
-        $totals     = $builder->join('product_attributes as pa', 'products.id', '=', 'pa.product_id')
+        $totals     = $builder->forPage(1)
+            ->join('product_attributes as pa', 'products.id', '=', 'pa.product_id')
             ->select('pa.attribute_id', DB::raw('count(*) as total'))
             ->where('pa.attribute_value_id', '<>', 0)
             ->groupBy('pa.attribute_id')
@@ -104,7 +106,8 @@ class FilterRepo
             if (! isset($totals[$item['attribute_id']])) {
                 continue;
             }
-            $result[] = $item;
+            $item['total'] = $totals[$item['attribute_id']];
+            $result[]      = $item;
         }
 
         return $result;
