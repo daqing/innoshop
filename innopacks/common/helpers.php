@@ -155,6 +155,9 @@ if (! function_exists('is_wechat_mini')) {
      */
     function is_wechat_mini(): bool
     {
+        if (request()->header('platform') == 'miniprogram') {
+            return true;
+        }
         $userAgent = request()->userAgent();
         if (str_contains($userAgent, 'wxwork') || str_contains($userAgent, 'wxlite') || str_contains($userAgent, 'miniprogram')) {
             return true;

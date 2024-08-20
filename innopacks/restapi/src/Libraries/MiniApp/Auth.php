@@ -57,8 +57,8 @@ class Auth
     private function getOptions(): array
     {
         $options = [
-            'app_id' => env('MINI_APP_ID', plugin_setting('we_chat_mini.appid')),
-            'secret' => env('MINI_APP_SECRET', plugin_setting('we_chat_mini.secret')),
+            'app_id' => plugin_setting('we_chat_mini.app_id'),
+            'secret' => plugin_setting('we_chat_mini.app_secret'),
             'debug'  => true,
             'log'    => [
                 'level' => 'debug',
