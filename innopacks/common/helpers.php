@@ -130,6 +130,52 @@ if (! function_exists('is_mobile')) {
     }
 }
 
+if (! function_exists('is_wechat_official')) {
+    /**
+     * Check if current is WeChat official by user agent.
+     *
+     * @return bool
+     */
+    function is_wechat_official(): bool
+    {
+        $userAgent = request()->userAgent();
+        if (str_contains($userAgent, 'MicroMessenger')) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
+if (! function_exists('is_wechat_mini')) {
+    /**
+     * Check if current is WeChat official by user agent.
+     *
+     * @return bool
+     */
+    function is_wechat_mini(): bool
+    {
+        $userAgent = request()->userAgent();
+        if (str_contains($userAgent, 'wxwork') || str_contains($userAgent, 'wxlite') || str_contains($userAgent, 'miniprogram')) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
+if (! function_exists('is_app')) {
+    /**
+     * Check if current is APP by request.
+     *
+     * @return bool
+     */
+    function is_app(): bool
+    {
+        return (bool) request()->header('from_app', false);
+    }
+}
+
 if (! function_exists('installed')) {
     /**
      * Check installed by DB connection.
