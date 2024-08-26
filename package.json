@@ -22,6 +22,8 @@
   "dependencies": {
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
-    "codemirror": "^6.0.1"
-  }
+    "codemirror": "^6.0.1",
+    "webpack": "^5.94.0"
+  },
+  "packageManager": "pnpm@9.1.0+sha1.217063ce3fcbf44f3051666f38b810f1ddefee4a"
 }
