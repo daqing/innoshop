@@ -40,8 +40,21 @@ class CountryRequest extends FormRequest
             'name'      => 'string|required|max:32',
             'code'      => $slugRule,
             'continent' => 'string|required',
-            'position'  => 'string',
+            'position'  => 'integer',
             'active'    => 'bool',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function attributes(): array
+    {
+        return [
+            'name'      => panel_trans('common.name'),
+            'code'      => panel_trans('common.code'),
+            'continent' => panel_trans('country.continent'),
+            'position'  => panel_trans('common.position'),
         ];
     }
 }

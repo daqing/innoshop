@@ -128,12 +128,13 @@ class CustomerRepo extends BaseRepo
     }
 
     /**
-     * @param  $item
+     * @param  Customer  $item
      * @return void
      */
     public function destroy($item): void
     {
-        $item->translations()->delete();
+        $item->favorites()->delete();
+        $item->socials()->delete();
         $item->delete();
     }
 
@@ -146,18 +147,24 @@ class CustomerRepo extends BaseRepo
     {
         $data = [
             'email'             => $requestData['email'],
+            'password'          => '',
             'name'              => $requestData['name'],
-            'avatar'            => $requestData['avatar']            ?? '',
             'customer_group_id' => $requestData['customer_group_id'] ?? 0,
             'address_id'        => $requestData['address_id']        ?? 0,
             'locale'            => $requestData['locale']            ?? locale_code(),
             'active'            => $requestData['active']            ?? true,
             'code'              => $requestData['code']              ?? '',
-            'from'              => $requestData['from']              ?? 'web',
+            'from'              => $requestData['from']              ?? 'pc_web',
         ];
 
-        if (isset($requestData['password'])) {
-            $data['password'] = bcrypt($requestData['password']);
+        $avatar = $requestData['avatar'] ?? '';
+        if ($avatar) {
+            $data['avatar'] = $avatar;
+        }
+
+        $password = $requestData['password'] ?? '';
+        if ($password) {
+            $data['password'] = bcrypt($password);
         }
 
         return $data;

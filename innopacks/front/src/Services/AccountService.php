@@ -30,7 +30,8 @@ class AccountService extends BaseService
         $customerData = [
             'email'    => $data['email'],
             'name'     => $parseData[0],
-            'password' => $data['password'],
+            'password' => $data['password'] ?? '',
+            'from'     => $this->checkFrom(),
             'active'   => 1,
         ];
 
@@ -75,19 +76,37 @@ class AccountService extends BaseService
         if ($verifyCode->created_at->addMinutes(10) < Carbon::now()) {
             $verifyCode->delete();
 
-            throw new Exception(trans('front::account.verify_code_expired'));
+            throw new Exception(front_trans('account.verify_code_expired'));
         }
 
         if ($verifyCode->code != $code) {
-            throw new Exception(trans('front::account.verify_code_error'));
+            throw new Exception(front_trans('account.verify_code_error'));
         }
 
         $customer = CustomerRepo::getInstance()->findByEmail($account);
         if (! $customer) {
-            throw new Exception(trans('front::account.account_not_exist'));
+            throw new Exception(front_trans('account.account_not_exist'));
         }
 
         CustomerRepo::getInstance()->forceUpdatePassword($customer, $password);
         $verifyCode->delete();
+    }
+
+    /**
+     * @return string
+     */
+    private function checkFrom(): string
+    {
+        if (is_wechat_mini()) {
+            return 'miniapp';
+        } elseif (is_wechat_official()) {
+            return 'wechat_official';
+        } elseif (is_mobile()) {
+            return 'mobile_web';
+        } elseif (is_app()) {
+            return 'app';
+        } else {
+            return 'pc_web';
+        }
     }
 }

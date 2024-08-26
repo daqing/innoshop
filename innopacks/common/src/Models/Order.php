@@ -20,6 +20,10 @@ use InnoShop\Common\Notifications\OrderUpdateNotification;
 
 /**
  * @Property int customer_id
+ * @Property string number
+ * @Property float total
+ * @Property string currency_code
+ * @Property string currency_value
  */
 class Order extends BaseModel
 {
@@ -96,7 +100,7 @@ class Order extends BaseModel
      */
     public function getStatusFormatAttribute(): string
     {
-        return trans('front::order.'.$this->status);
+        return front_trans('order.'.$this->status);
     }
 
     /**
