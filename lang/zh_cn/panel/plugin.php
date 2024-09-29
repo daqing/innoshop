@@ -8,12 +8,14 @@
  */
 
 return [
+    'all'      => '所有插件',
     'billing'  => '支付方式',
     'shipping' => '配送方式',
     'feature'  => '功能模块',
     'fee'      => '订单计费',
     'social'   => '社交登录',
     'language' => '语言扩展',
+    'intelli'  => 'AI大模型',
 
     'bind_token'             => '绑定Token',
     'get_token'              => '获取Token',

@@ -8,5 +8,7 @@
  */
 
 return [
-    'attribute_value' => 'Attribute Value',
+    'review'         => 'Revisión',
+    'review_content' => 'Revisión del contenido',
+    'rating'         => 'Calificación',
 ];

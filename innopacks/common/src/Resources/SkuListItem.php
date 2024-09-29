@@ -23,11 +23,17 @@ class SkuListItem extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $imagePath      = $this->image->path ?? '';
+        $imageUrl       = $imagePath ? image_resize($imagePath) : '';
+        $originImageUrl = $imagePath ? image_origin($imagePath) : '';
+
         return [
             'id'                  => $this->id,
             'product_id'          => $this->product_id,
             'product_image_id'    => $this->product_image_id,
-            'image'               => image_resize($this->image->path ?? ''),
+            'image'               => $imagePath,
+            'image_url'           => $imageUrl,
+            'origin_image_url'    => $originImageUrl,
             'variants'            => $this->variants,
             'model'               => $this->model,
             'code'                => $this->code,

@@ -377,6 +377,20 @@ if (! function_exists('front_trans')) {
     }
 }
 
+if (! function_exists('theme_trans')) {
+    /**
+     * @param  $themeCode
+     * @param  null  $key
+     * @param  array  $replace
+     * @param  null  $locale
+     * @return mixed
+     */
+    function theme_trans($themeCode, $key = null, array $replace = [], $locale = null): mixed
+    {
+        return trans("theme-$themeCode::$key", $replace, $locale);
+    }
+}
+
 if (! function_exists('inno_view')) {
     /**
      * @param  null  $view
@@ -414,7 +428,7 @@ if (! function_exists('create_json_success')) {
      */
     function create_json_success($data = null): JsonResponse
     {
-        return json_success(panel_trans('common.created_success'), $data);
+        return json_success(panel_trans('common.saved_success'), $data);
     }
 }
 
@@ -938,5 +952,31 @@ if (! function_exists('to_sql')) {
         }
 
         return $sql;
+    }
+}
+
+if (! function_exists('parsedown')) {
+    /**
+     * @param  string|null  $value
+     * @param  bool|null  $inline
+     * @return Parsedown|string
+     */
+    function parsedown(?string $value = null, ?bool $inline = null): Parsedown|string
+    {
+        $parser = new Parsedown;
+
+        if (! func_num_args()) {
+            return $parser;
+        }
+
+        if (is_null($inline)) {
+            $inline = config('parsedown.inline');
+        }
+
+        if ($inline) {
+            return $parser->line($value);
+        }
+
+        return $parser->text($value);
     }
 }

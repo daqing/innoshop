@@ -21,6 +21,9 @@ Route::middleware(['admin_auth:admin'])
 
         Route::get('/locale/{code}', [Controllers\LocaleController::class, 'switch'])->name('locale.switch');
 
+        Route::post('/upload/images', [Controllers\UploadController::class, 'images'])->name('upload.images');
+        Route::post('/upload/files', [Controllers\UploadController::class, 'files'])->name('upload.files');
+
         Route::resource('/orders', Controllers\OrderController::class);
         Route::put('/orders/{order}/status', [Controllers\OrderController::class, 'changeStatus'])->name('orders.change_status');
 
@@ -37,6 +40,9 @@ Route::middleware(['admin_auth:admin'])
 
         Route::resource('/brands', Controllers\BrandController::class);
         Route::put('/brands/{currency}/active', [Controllers\BrandController::class, 'active'])->name('brands.active');
+
+        Route::resource('/reviews', Controllers\ReviewController::class);
+        Route::put('/reviews/{review}/active', [Controllers\ReviewController::class, 'active'])->name('reviews.active');
 
         Route::resource('/articles', Controllers\ArticleController::class);
         Route::put('/articles/{currency}/active', [Controllers\ArticleController::class, 'active'])->name('articles.active');
@@ -77,6 +83,8 @@ Route::middleware(['admin_auth:admin'])
 
         Route::get('/settings', [Controllers\SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [Controllers\SettingController::class, 'update'])->name('settings.update');
+
+        Route::post('/content_ai/generate', [Controllers\ContentAIController::class, 'generate'])->name('content_ai.generate');
 
         Route::resource('/admins', Controllers\AdminController::class);
         Route::put('/admins/{currency}/active', [Controllers\AdminController::class, 'active'])->name('admins.active');

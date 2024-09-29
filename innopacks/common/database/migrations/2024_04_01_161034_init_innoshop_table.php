@@ -31,6 +31,7 @@ return new class extends Migration
             $table->unsignedInteger('customer_id')->index('customer_id')->comment('Customer ID');
             $table->string('guest_id')->default('')->comment('Guest ID, like session id');
             $table->string('name')->comment('Customer Name');
+            $table->string('email')->nullable()->comment('Email');
             $table->string('phone')->default('')->comment('Telephone');
             $table->unsignedInteger('country_id')->index('country_id')->comment('Country ID');
             $table->unsignedInteger('state_id')->index('state_id')->comment('state ID');
@@ -79,7 +80,7 @@ return new class extends Migration
             $table->string('image')->nullable()->comment('Article Image');
             $table->text('content')->nullable()->comment('Content');
             $table->string('meta_title')->nullable()->comment('Meta Title');
-            $table->string('meta_description')->nullable()->comment('Meta description');
+            $table->text('meta_description')->nullable()->comment('Meta description');
             $table->string('meta_keywords')->nullable()->comment('Meta keywords');
             $table->timestamps();
         });
@@ -194,10 +195,10 @@ return new class extends Migration
             $table->integer('catalog_id')->index('ct_catalog_id')->comment('Category ID');
             $table->string('locale')->comment('Locale Code');
             $table->string('title')->comment('Title');
-            $table->text('summary')->comment('Category Summary');
-            $table->string('meta_title')->comment('Meta Title');
-            $table->string('meta_description')->comment('Meta Translation');
-            $table->string('meta_keywords')->comment('Meta Keywords');
+            $table->text('summary')->nullable()->comment('Category Summary');
+            $table->string('meta_title')->nullable()->comment('Meta Title');
+            $table->text('meta_description')->nullable()->comment('Meta Translation');
+            $table->string('meta_keywords')->nullable()->comment('Meta Keywords');
             $table->timestamps();
         });
 
@@ -237,9 +238,9 @@ return new class extends Migration
             $table->string('locale')->comment('Locale Code');
             $table->string('name')->comment('Name');
             $table->text('content')->comment('Content');
-            $table->string('meta_title')->default('')->comment('Meta Title');
-            $table->string('meta_description')->default('')->comment('meta  Translation');
-            $table->string('meta_keywords')->default('')->comment('Meta Keywords');
+            $table->string('meta_title')->nullable()->comment('Meta Title');
+            $table->text('meta_description')->nullable()->comment('meta  Translation');
+            $table->string('meta_keywords')->nullable()->comment('Meta Keywords');
             $table->timestamps();
         });
 
@@ -583,7 +584,7 @@ return new class extends Migration
             $table->text('content')->nullable()->comment('Content');
             $table->text('template')->nullable()->comment('Content');
             $table->string('meta_title')->nullable()->comment('Meta Title');
-            $table->string('meta_description')->nullable()->comment('Meta description');
+            $table->text('meta_description')->nullable()->comment('Meta description');
             $table->string('meta_keywords')->nullable()->comment('Meta keywords');
             $table->timestamps();
         });
@@ -680,11 +681,11 @@ return new class extends Migration
             $table->unsignedBigInteger('product_id')->index('pt_product_id')->comment('Product ID');
             $table->string('locale')->comment('Locale Code');
             $table->string('name')->comment('Name');
-            $table->string('summary')->comment('Summary');
+            $table->text('summary')->nullable()->comment('Summary');
             $table->text('content')->comment('Content');
-            $table->string('meta_title')->default('')->comment('Meta Title');
-            $table->string('meta_description')->default('')->comment('Meta Description');
-            $table->string('meta_keywords')->default('')->comment('Meta Keywords');
+            $table->string('meta_title')->nullable()->comment('Meta Title');
+            $table->text('meta_description')->nullable()->comment('Meta Description');
+            $table->string('meta_keywords')->nullable()->comment('Meta Keywords');
             $table->timestamps();
         });
 
@@ -742,9 +743,8 @@ return new class extends Migration
             $table->bigIncrements('id')->comment('ID');
             $table->integer('customer_id')->nullable()->index('rv_customer_id');
             $table->integer('product_id')->nullable()->index('rv_product_id');
-            $table->integer('order_product_id')->nullable()->index('rv_op_id');
+            $table->integer('order_item_id')->nullable()->index('rv_oi_id');
             $table->integer('rating');
-            $table->string('title');
             $table->string('content');
             $table->integer('like');
             $table->integer('dislike');

@@ -84,7 +84,7 @@
                         </div>
                       </div>
                       <div class="edit-address text-decoration-underline text-secondary" @click="editAddress(index)">
-                        编辑
+                        {{ __('front/common.edit') }}
                       </div>
                     </div>
                   </div>
@@ -194,6 +194,7 @@
               @endforeach
               <li><span>{{ __('front/cart.total') }}</span><span>{{ currency_format($total) }}</span></li>
             </ul>
+            @hookinsert('checkout.confirm.before')
             <button class="btn btn-primary btn-lg fw-bold w-100 to-checkout" :disabled="isCheckout"
                     type="button" @click="submitCheckout">{{ __('front/checkout.place_order') }}
             </button>
@@ -203,7 +204,7 @@
     </div>
   </div>
 
-  @hookinsert('checkout.top')
+  @hookinsert('checkout.bottom')
 
 @endsection
 

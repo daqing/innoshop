@@ -32,6 +32,40 @@ class ProductRepo extends BaseRepo
     }
 
     /**
+     * @param  array  $filters
+     * @return LengthAwarePaginator
+     * @throws Exception
+     */
+    public function getFrontList(array $filters = []): LengthAwarePaginator
+    {
+        $sort    = $filters['sort']     ?? 'created_at';
+        $order   = $filters['order']    ?? 'desc';
+        $perPage = $filters['per_page'] ?? 15;
+
+        $builder = $this->withActive()->builder($filters);
+
+        if ($sort == 'pt.name') {
+            $builder->select(['products.*', 'pt.name', 'pt.content']);
+            $builder->join('product_translations as pt', function ($join) {
+                $join->on('products.id', '=', 'pt.product_id')
+                    ->where('pt.locale', locale_code());
+            });
+        } elseif ($sort == 'ps.price') {
+            $builder->select(['products.*', 'ps.price']);
+            $builder->join('product_skus as ps', function ($query) {
+                $query->on('ps.product_id', '=', 'products.id')
+                    ->where('is_default', true);
+            });
+        }
+
+        if ($sort && $order) {
+            $builder->orderBy($sort, $order);
+        }
+
+        return $builder->paginate($perPage);
+    }
+
+    /**
      * Create product.
      *
      * @param  $data
@@ -104,13 +138,15 @@ class ProductRepo extends BaseRepo
             }
 
             $product->translations()->createMany($this->handleTranslations($data['translations']));
-            $product->skus()->createMany($this->handleSkus($product, $data['skus']));
+            $product->productAttributes()->createMany($this->handleAttributes($data['attributes'] ?? []));
             $product->categories()->sync($data['categories'] ?? []);
 
             if (isset($data['images'])) {
                 $product->images()->delete();
                 $this->syncImages($product, $data['images'] ?: []);
             }
+
+            $product->skus()->createMany($this->handleSkus($product, $data['skus']));
 
             $masterSku = $product->skus()->where('is_default', true)->first();
 
@@ -154,29 +190,6 @@ class ProductRepo extends BaseRepo
             'published_at'     => $data['published_at'] ?? now(),
             'active'           => true,
         ];
-    }
-
-    /**
-     * @param  $translations
-     * @return array
-     */
-    private function handleTranslations($translations): array
-    {
-        $items = [];
-        foreach ($translations as $translation) {
-            $name    = $translation['name'];
-            $items[] = [
-                'locale'           => $translation['locale'],
-                'name'             => $name,
-                'summary'          => $translation['summary']          ?? $name,
-                'content'          => $translation['content']          ?? $name,
-                'meta_title'       => $translation['meta_title']       ?? $name,
-                'meta_description' => $translation['meta_description'] ?? $name,
-                'meta_keywords'    => $translation['meta_keywords']    ?? $name,
-            ];
-        }
-
-        return $items;
     }
 
     /**
@@ -225,6 +238,47 @@ class ProductRepo extends BaseRepo
                 'is_default'       => $isDefault,
                 'position'         => $sku['position'] ?? 0,
             ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * @param  $translations
+     * @return array
+     */
+    private function handleTranslations($translations): array
+    {
+        $items = [];
+        foreach ($translations as $translation) {
+            $name    = $translation['name'];
+            $items[] = [
+                'locale'           => $translation['locale'],
+                'name'             => $name,
+                'summary'          => $translation['summary']          ?? $name,
+                'selling_point'    => $translation['selling_point']    ?? $name,
+                'content'          => $translation['content']          ?? $name,
+                'meta_title'       => $translation['meta_title']       ?? $name,
+                'meta_description' => $translation['meta_description'] ?? $name,
+                'meta_keywords'    => $translation['meta_keywords']    ?? $name,
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * @param  $attributes
+     * @return array
+     */
+    private function handleAttributes($attributes): array
+    {
+        $items = [];
+        foreach ($attributes as $attribute) {
+            if (empty($attribute['attribute_id'] ?? []) || empty($attribute['attribute_value_id'] ?? [])) {
+                continue;
+            }
+            $items[] = $attribute;
         }
 
         return $items;

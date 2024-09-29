@@ -9,6 +9,7 @@
 
 namespace InnoShop\Front;
 
+use Exception;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -19,6 +20,7 @@ use InnoShop\Common\Models\Customer;
 use InnoShop\Front\Middleware\CustomerAuthentication;
 use InnoShop\Front\Middleware\GlobalFrontData;
 use InnoShop\Front\Middleware\SetFrontLocale;
+use InnoShop\Panel\Repositories\ThemeRepo;
 
 class FrontServiceProvider extends ServiceProvider
 {
@@ -26,7 +28,7 @@ class FrontServiceProvider extends ServiceProvider
      * Boot front service provider.
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function boot(): void
     {
@@ -38,10 +40,12 @@ class FrontServiceProvider extends ServiceProvider
 
         load_settings();
         $this->registerGuard();
+        $this->registerUploadFileSystem();
         $this->registerWebRoutes();
         $this->publishViewTemplates();
         $this->loadThemeViewPath();
         $this->loadViewComponents();
+        $this->loadThemeTranslations();
     }
 
     /**
@@ -69,10 +73,34 @@ class FrontServiceProvider extends ServiceProvider
     }
 
     /**
+     * @return void
+     */
+    protected function registerUploadFileSystem(): void
+    {
+        Config::set('filesystems.disks.upload', [
+            'driver'      => 'local',
+            'root'        => public_path('upload'),
+            'url'         => env('APP_URL').'/upload',
+            'visibility'  => 'public',
+            'throw'       => true,
+            'permissions' => [
+                'file' => [
+                    'public'  => 0755,
+                    'private' => 0755,
+                ],
+                'dir' => [
+                    'public'  => 0755,
+                    'private' => 0755,
+                ],
+            ],
+        ]);
+    }
+
+    /**
      * Register admin front routes.
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     protected function registerWebRoutes(): void
     {
@@ -170,6 +198,25 @@ class FrontServiceProvider extends ServiceProvider
     {
         $this->loadViewComponentsAs('front', [
             'breadcrumb' => Components\Breadcrumb::class,
+            'review'     => Components\Review::class,
         ]);
+    }
+
+    /**
+     * Load theme languages.
+     *
+     * @return void
+     */
+    protected function loadThemeTranslations(): void
+    {
+        $themes = ThemeRepo::getInstance()->getListFromPath();
+        foreach ($themes as $theme) {
+            $themeCode     = $theme['code'];
+            $themeLangPath = base_path("themes/{$themeCode}/lang");
+            if (! is_dir($themeLangPath)) {
+                continue;
+            }
+            $this->loadTranslationsFrom($themeLangPath, "theme-$themeCode");
+        }
     }
 }

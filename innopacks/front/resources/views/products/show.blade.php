@@ -84,7 +84,6 @@
           </ul>
 
           @include('products._variants')
-
           <div class="product-info-bottom">
             <div class="quantity-wrap">
               <div class="minus"><i class="bi bi-dash-lg"></i></div>
@@ -112,11 +111,16 @@
         <li class="nav-item">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#product-description-attribute" type="button">{{ __('front/product.attribute') }}</button>
         </li>
+        <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#product-review" type="button">{{ __('front/product.review') }}</button>
+      </li>
       @endif
     </ul>
-
     <div class="tab-content">
       <div class="tab-pane fade show active" id="product-description-description">
+        @if($product->translation->selling_point)
+          {!! parsedown($product->translation->selling_point) !!}
+        @endif
         {!! $product->translation->content !!}
       </div>
 
@@ -141,8 +145,13 @@
           </table>
         </div>
       @endif
+
+      <div class="tab-pane fade" id="product-review" role="tabpanel">
+        @include('products.review')
+      </div>
     </div>
   </div>
+
 </div>
 
 @hookinsert('product.show.bottom')

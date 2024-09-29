@@ -8,12 +8,14 @@
  */
 
 return [
-    'billing'  => 'Facturación',
-    'shipping' => 'Envío',
-    'feature'  => 'Característica',
-    'fee'      => 'Tarifa del pedido',
+    'all'      => 'All',
+    'billing'  => 'Billing',
+    'shipping' => 'Shipping',
+    'feature'  => 'Feature',
+    'fee'      => 'Order Fee',
     'social'   => 'Social',
-    'language' => 'Idioma',
+    'language' => 'Language',
+    'intelli'  => 'Intelli',
 
     'bind_token'             => 'Bind Token',
     'get_token'              => 'Get Token',
