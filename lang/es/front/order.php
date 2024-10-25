@@ -39,4 +39,7 @@ return [
     'product_image' => 'imagen del producto',
     'Product_spec'  => 'especificación del producto',
     'close'         => 'Cerrar',
+    'image'         => 'Imagen',
+    'order_billing' => 'Método de Pago',
+    'product_spec'  => 'Especificación del Producto',
 ];

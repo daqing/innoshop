@@ -2,10 +2,10 @@
 <div class="product-variant-box">
   @foreach($variants as $key => $variant)
     <div class="product-variant">
-      <div class="variant-title">{{ $variant['name'][locale_code()] ?? '' }}</div>
+      <div class="variant-title">{{ $variant['name'][front_locale_code()] ?? '-' }}</div>
       <div class="variant-values">
         @foreach($variant['values'] as $vk => $value)
-          <div class="variant-value-name" data-variant="{{ $key }}" data-value="{{ $vk }}">{{ $value['name'][front_locale_code()] }}</div>
+          <div class="variant-value-name" data-variant="{{ $key }}" data-value="{{ $vk }}">{{ $value['name'][front_locale_code()] ?? '-' }}</div>
         @endforeach
       </div>
     </div>
@@ -52,7 +52,7 @@
       $('.product-param .model .value').text(masterSku.model);
       $('.product-price .price').text(masterSku.price_format);
       $('.product-price .old-price').text(masterSku.origin_price_format);
-      $('.product-quantity').attr('data-skuid', masterSku.id)
+      $('.product-quantity').data('sku-id', masterSku.id)
       $('.main-product-img img').attr('src', masterSku.origin_image_url);
       history.pushState({}, '', inno.updateQueryStringParameter(window.location.href, 'sku_id', masterSku.id));
 

@@ -11,6 +11,7 @@
 @section('content')
   <div class="card h-min-600">
     <div class="card-body">
+
       @if ($roles->count())
         <div class="table-responsive">
           <table class="table align-middle">

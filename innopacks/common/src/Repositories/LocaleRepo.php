@@ -16,7 +16,43 @@ use InnoShop\Common\Models\Locale;
 
 class LocaleRepo extends BaseRepo
 {
+    /**
+     * @return array[]
+     */
+    public static function getCriteria(): array
+    {
+        return [
+            ['name' => 'name', 'type' => 'input', 'label' => trans('panel/common.name')],
+            ['name' => 'code', 'type' => 'input', 'label' => trans('panel/currency.code')],
+            ['name' => 'status', 'type' => 'input', 'label' => trans('panel/common.status')],
+        ];
+    }
+
     public static ?Collection $enabledLocales = null;
+
+    /**
+     * https://lingohub.com/blog/right-to-left-vs-left-to-right
+     *
+     * Get all RTL languages.
+     * @return string[]
+     */
+    public static function getRtlLanguages(): array
+    {
+        return [
+            'ar'  => 'Arabic',
+            'arc' => 'Aramaic',
+            'dv	' => 'Divehi',
+            'fa	' => 'Persian',
+            'ha	' => 'Hausa',
+            'he	' => 'Hebrew',
+            'khw' => 'Khowar',
+            'ks	' => 'Kashmiri',
+            'ku	' => 'Kurdish',
+            'ps	' => 'Pashto',
+            'ur	' => 'Urdu',
+            'yi	' => 'Yiddish',
+        ];
+    }
 
     /**
      * @param  $data
@@ -36,7 +72,7 @@ class LocaleRepo extends BaseRepo
 
         $result = [];
         foreach (front_lang_path_codes() as $localeCode) {
-            $langFile = lang_path("/$localeCode/front/base.php");
+            $langFile = lang_path("/$localeCode/common/base.php");
             if (! is_file($langFile)) {
                 throw new Exception("File ($langFile) not exist!");
             }

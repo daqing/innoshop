@@ -346,6 +346,21 @@ if (! function_exists('current_locale')) {
     }
 }
 
+if (! function_exists('front_locale_direction')) {
+    /**
+     * Get locale direction for frontend.
+     *
+     * @return string
+     */
+    function front_locale_direction(): string
+    {
+        $localeCode = front_locale_code();
+        $rtlCodes   = array_keys(LocaleRepo::getRtlLanguages());
+
+        return in_array($localeCode, $rtlCodes) ? 'rtl' : 'ltr';
+    }
+}
+
 if (! function_exists('front_lang_path_codes')) {
     /**
      * Get all panel languages
@@ -774,7 +789,12 @@ if (! function_exists('current_currency')) {
      */
     function current_currency(): mixed
     {
-        return currencies()->where('code', current_currency_code())->first();
+        $currency = currencies()->where('code', current_currency_code())->first();
+        if ($currency) {
+            return $currency;
+        }
+
+        return currencies()->first();
     }
 }
 

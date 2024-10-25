@@ -18,6 +18,23 @@ use Throwable;
 class CustomerRepo extends BaseRepo
 {
     /**
+     * @return array[]
+     */
+    public static function getCriteria(): array
+    {
+        return [
+            ['name' => 'keyword', 'type' => 'input', 'label' => trans('panel/customer.name')],
+            ['name' => 'email', 'type' => 'input', 'label' => trans('panel/customer.email')],
+            ['name' => 'from', 'type' => 'input', 'label' => trans('panel/customer.from')],
+            ['name' => 'locale', 'type' => 'input', 'label' => trans('panel/customer.locale')],
+            ['name'     => 'created_at', 'type' => 'date_range', 'label' => trans('panel/common.created_at'),
+                'start' => ['name' => 'start'],
+                'end'   => ['name' => 'end'],
+            ],
+        ];
+    }
+
+    /**
      * @param  $filters
      * @return LengthAwarePaginator
      * @throws Exception
@@ -44,12 +61,32 @@ class CustomerRepo extends BaseRepo
             $builder->where('active', (bool) $filters['active']);
         }
 
+        $locale = $filters['locale'] ?? '';
+        if ($locale) {
+            $builder->where('locale', $locale);
+        }
+
+        $from = $filters['from'] ?? '';
+        if ($from) {
+            $builder->where('from', $from);
+        }
+
         $keyword = $filters['keyword'] ?? '';
         if ($keyword) {
             $builder->where(function ($query) use ($keyword) {
                 $query->where('email', 'like', "%$keyword%")
                     ->orWhere('name', 'like', "%$keyword%");
             });
+        }
+
+        $start = $filters['start'] ?? '';
+        if ($start) {
+            $builder->where('created_at', '>', $start);
+        }
+
+        $end = $filters['end'] ?? '';
+        if ($end) {
+            $builder->where('created_at', '<', $end);
         }
 
         return fire_hook_filter('repo.customer.builder', $builder);
@@ -78,6 +115,27 @@ class CustomerRepo extends BaseRepo
     public function update($item, $data): mixed
     {
         $data = $this->handleData($data);
+
+        $item->fill($data);
+        $item->saveOrFail();
+
+        return $item;
+    }
+
+    /**
+     * Update profile only include avatar, name and email.
+     *
+     * @param  $item
+     * @param  $data
+     * @return mixed
+     */
+    public function updateProfile($item, $data): mixed
+    {
+        $data = [
+            'avatar' => $data['avatar'],
+            'name'   => $data['name'],
+            'email'  => $data['email'],
+        ];
 
         $item->fill($data);
         $item->saveOrFail();

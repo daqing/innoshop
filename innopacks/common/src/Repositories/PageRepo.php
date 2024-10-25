@@ -18,6 +18,17 @@ use InnoShop\Common\Models\Page;
 class PageRepo extends BaseRepo
 {
     /**
+     * @return array[]
+     */
+    public static function getCriteria(): array
+    {
+        return [
+            ['name' => 'title', 'type' => 'input', 'label' => trans('panel/article.title')],
+            ['name' => 'slug', 'type' => 'input', 'label' => trans('panel/common.slug')],
+        ];
+    }
+
+    /**
      * @param  $filters
      * @return LengthAwarePaginator
      * @throws Exception
@@ -47,6 +58,13 @@ class PageRepo extends BaseRepo
         $pageIds = $filters['page_ids'] ?? [];
         if ($pageIds) {
             $builder->whereIn('id', $pageIds);
+        }
+
+        $title = $filters['title'] ?? '';
+        if ($title) {
+            $builder->whereHas('translation', function ($query) use ($title) {
+                $query->where('title', 'like', "%$title%");
+            });
         }
 
         if (isset($filters['active'])) {

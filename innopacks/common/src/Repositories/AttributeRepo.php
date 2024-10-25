@@ -9,6 +9,7 @@
 
 namespace InnoShop\Common\Repositories;
 
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,20 @@ use Throwable;
 
 class AttributeRepo extends BaseRepo
 {
+    /**
+     * @return array[]
+     */
+    public static function getCriteria(): array
+    {
+        return [
+            ['name' => 'keyword', 'type' => 'input', 'label' => trans('panel/common.name')],
+            ['name'     => 'created_at', 'type' => 'date_range', 'label' => trans('panel/common.created_at'),
+                'start' => ['name' => 'start'],
+                'end'   => ['name' => 'end'],
+            ],
+        ];
+    }
+
     /**
      * @param  array  $filters
      * @return Collection
@@ -32,13 +47,28 @@ class AttributeRepo extends BaseRepo
      */
     public function builder(array $filters = []): Builder
     {
-        $builder = Attribute::query()->with('translation');
+        $builder = Attribute::query()->with([
+            'translation',
+            'translations',
+            'values.translations',
+            'group.translations',
+        ]);
 
         $keyword = $filters['keyword'] ?? '';
         if ($keyword) {
             $builder->whereHas('translation', function (Builder $query) use ($keyword) {
                 $query->where('name', 'like', "%$keyword%");
             });
+        }
+
+        $start = $filters['start'] ?? '';
+        if ($start) {
+            $builder->where('created_at', '>', $start);
+        }
+
+        $end = $filters['end'] ?? '';
+        if ($end) {
+            $builder->where('created_at', '<', $end);
         }
 
         return $builder;
@@ -64,7 +94,7 @@ class AttributeRepo extends BaseRepo
             DB::commit();
 
             return $attribute;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }
@@ -93,7 +123,35 @@ class AttributeRepo extends BaseRepo
             DB::commit();
 
             return $item;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * @param  mixed  $item
+     * @throws Exception
+     */
+    public function destroy(mixed $item): void
+    {
+        DB::beginTransaction();
+
+        try {
+            if (is_int($item)) {
+                $item = Attribute::query()->find($item);
+            }
+            if ($item) {
+                foreach ($item->values as $value) {
+                    $value->translations()->delete();
+                }
+                $item->values()->delete();
+                $item->productAttributes()->delete();
+                $item->translations()->delete();
+                $item->delete();
+            }
+            DB::commit();
+        } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }
@@ -106,9 +164,9 @@ class AttributeRepo extends BaseRepo
     private function handleData($requestData): array
     {
         return [
-            'category_id'        => $requestData['category_id']               ?? 0,
+            'category_id'        => $requestData['category_id']        ?? 0,
             'attribute_group_id' => $requestData['attribute_group_id'] ?? 0,
-            'position'           => $requestData['position']                     ?? 0,
+            'position'           => $requestData['position']           ?? 0,
         ];
     }
 }

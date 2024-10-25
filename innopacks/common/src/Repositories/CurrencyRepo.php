@@ -17,6 +17,21 @@ use InnoShop\Common\Models\Currency;
 class CurrencyRepo extends BaseRepo
 {
     /**
+     * @return array[]
+     */
+    public static function getCriteria(): array
+    {
+        return [
+            ['name' => 'name', 'type' => 'input', 'label' => trans('panel/currency.name')],
+            ['name' => 'code', 'type' => 'input', 'label' => trans('panel/currency.code')],
+            ['name' => 'symbol_left', 'type' => 'input', 'label' => trans('panel/currency.symbol_left')],
+            ['name' => 'symbol_right', 'type' => 'input', 'label' => trans('panel/currency.symbol_right')],
+            ['name' => 'decimal_place', 'type' => 'input', 'label' => trans('panel/currency.decimal_place')],
+            ['name' => 'value', 'type' => 'input', 'label' => trans('panel/currency.value')],
+        ];
+    }
+
+    /**
      * @param  $filters
      * @return LengthAwarePaginator
      * @throws \Exception
@@ -42,9 +57,14 @@ class CurrencyRepo extends BaseRepo
     {
         $builder = Currency::query();
 
-        $email = $filters['email'] ?? '';
-        if ($email) {
-            $builder->where('email', 'like', "%$email%");
+        $name = $filters['name'] ?? '';
+        if ($name) {
+            $builder->where('name', 'like', "%$name%");
+        }
+
+        $code = $filters['code'] ?? '';
+        if ($code) {
+            $builder->where('code', 'like', "%$code%");
         }
 
         if (isset($filters['active'])) {
@@ -54,8 +74,8 @@ class CurrencyRepo extends BaseRepo
         $keyword = $filters['keyword'] ?? '';
         if ($keyword) {
             $builder->where(function ($query) use ($keyword) {
-                $query->where('email', 'like', "%$keyword%")
-                    ->orWhere('name', 'like', "%$keyword%");
+                $query->where('name', 'like', "%$keyword%")
+                    ->orWhere('code', 'like', "%$keyword%");
             });
         }
 
