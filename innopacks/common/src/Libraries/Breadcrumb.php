@@ -9,6 +9,8 @@
 
 namespace InnoShop\Common\Libraries;
 
+use Exception;
+
 class Breadcrumb
 {
     public static function getInstance(): Breadcrumb
@@ -21,6 +23,7 @@ class Breadcrumb
      * @param  $object
      * @param  string  $title
      * @return array
+     * @throws Exception
      */
     public function getTrail($type, $object, string $title = ''): array
     {
@@ -41,7 +44,7 @@ class Breadcrumb
             ];
         } elseif ($type == 'route') {
             if (empty($title)) {
-                $title = trans('front::common.'.str_replace('.', '_', $object));
+                $title = front_trans('common.'.str_replace('.', '_', $object));
             }
 
             return [

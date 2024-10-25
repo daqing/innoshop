@@ -25,8 +25,8 @@ class UploadController
     {
         $image    = $request->file('image');
         $type     = $request->file('type', 'common');
-        $filePath = $image->store("/{$type}", 'public');
-        $realPath = "storage/$filePath";
+        $filePath = $image->store("/{$type}", 'upload');
+        $realPath = "upload/$filePath";
 
         $data = [
             'url'   => asset($realPath),
@@ -46,8 +46,8 @@ class UploadController
     {
         $file     = $request->file('file');
         $type     = $request->file('type', 'files');
-        $filePath = $file->store("/{$type}", 'public');
-        $realPath = "storage/$filePath";
+        $filePath = $file->store("/{$type}", 'upload');
+        $realPath = "upload/$filePath";
 
         $data = [
             'url'   => asset($realPath),

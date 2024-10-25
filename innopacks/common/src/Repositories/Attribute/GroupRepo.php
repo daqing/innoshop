@@ -14,15 +14,30 @@ use Illuminate\Support\Facades\DB;
 use InnoShop\Common\Models\Attribute\Group;
 use InnoShop\Common\Repositories\BaseRepo;
 use InnoShop\Common\Resources\AttributeGroupSimple;
+use Throwable;
 
 class GroupRepo extends BaseRepo
 {
     public string $model = Group::class;
 
     /**
+     * @return array[]
+     */
+    public static function getCriteria(): array
+    {
+        return [
+            ['name' => 'keyword', 'type' => 'input', 'label' => trans('panel/common.name')],
+            ['name'     => 'created_at', 'type' => 'date_range', 'label' => trans('panel/common.created_at'),
+                'start' => ['name' => 'start'],
+                'end'   => ['name' => 'end'],
+            ],
+        ];
+    }
+
+    /**
      * @param  $data
      * @return mixed
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function create($data): mixed
     {
@@ -100,6 +115,28 @@ class GroupRepo extends BaseRepo
      */
     public function builder(array $filters = []): Builder
     {
-        return Group::query()->with(['translation']);
+        $builder = Group::query()->with([
+            'translation',
+            'translations',
+        ]);
+
+        $keyword = $filters['keyword'] ?? '';
+        if ($keyword) {
+            $builder->whereHas('translation', function (Builder $query) use ($keyword) {
+                $query->where('name', 'like', "%$keyword%");
+            });
+        }
+
+        $start = $filters['start'] ?? '';
+        if ($start) {
+            $builder->where('created_at', '>', $start);
+        }
+
+        $end = $filters['end'] ?? '';
+        if ($end) {
+            $builder->where('created_at', '<', $end);
+        }
+
+        return $builder;
     }
 }

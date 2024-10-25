@@ -57,11 +57,11 @@ class ThemeController extends BaseController
         $settingUrl = panel_route('themes_settings.index');
 
         try {
-            SettingRepo::getInstance()->updateValues($settings);
+            ThemeRepo::getInstance()->updateSetting($settings);
 
             return redirect($settingUrl)
                 ->with('instance', $settings)
-                ->with('success', trans('panel::common.updated_success'));
+                ->with('success', panel_trans('common.updated_success'));
         } catch (\Exception $e) {
             return redirect($settingUrl)->withInput()->withErrors(['error' => $e->getMessage()]);
         }
@@ -77,7 +77,7 @@ class ThemeController extends BaseController
         try {
             SettingRepo::getInstance()->updateSystemValue('theme', $themeCode);
 
-            return json_success(trans('panel::common.updated_success'));
+            return json_success(panel_trans('common.updated_success'));
         } catch (\Exception $e) {
             return json_fail($e->getMessage());
         }

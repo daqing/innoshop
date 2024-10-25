@@ -9,6 +9,7 @@
 
 namespace InnoShop\Common\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
@@ -17,9 +18,14 @@ use InnoShop\Common\Models\Order\History;
 use InnoShop\Common\Models\Order\Item;
 use InnoShop\Common\Notifications\OrderNewNotification;
 use InnoShop\Common\Notifications\OrderUpdateNotification;
+use InnoShop\Common\Services\StateMachineService;
 
 /**
  * @Property int customer_id
+ * @Property string number
+ * @Property float total
+ * @Property string currency_code
+ * @Property string currency_value
  */
 class Order extends BaseModel
 {
@@ -93,10 +99,18 @@ class Order extends BaseModel
 
     /**
      * @return string
+     * @throws Exception
      */
     public function getStatusFormatAttribute(): string
     {
-        return trans('front::order.'.$this->status);
+        $statusCode = $this->status;
+        if ($statusCode == null) {
+            return '';
+        }
+
+        $statusMap = array_column(StateMachineService::getAllStatuses(), 'name', 'status');
+
+        return $statusMap[$statusCode] ?? '';
     }
 
     /**

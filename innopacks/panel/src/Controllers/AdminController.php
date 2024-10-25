@@ -28,7 +28,8 @@ class AdminController extends BaseController
     {
         $filters = $request->all();
         $data    = [
-            'admins' => AdminRepo::getInstance()->list($filters),
+            'criteria' => AdminRepo::getCriteria(),
+            'admins'   => AdminRepo::getInstance()->list($filters),
         ];
 
         return inno_view('panel::admins.index', $data);
@@ -67,7 +68,7 @@ class AdminController extends BaseController
 
             return redirect(panel_route('admins.index'))
                 ->with('instance', $admin)
-                ->with('success', trans('panel::common.created_success'));
+                ->with('success', panel_trans('common.created_success'));
         } catch (Exception $e) {
             return redirect(panel_route('admins.index'))
                 ->withErrors(['error' => $e->getMessage()]);
@@ -112,7 +113,7 @@ class AdminController extends BaseController
 
             return redirect(panel_route('admins.index'))
                 ->with('instance', $admin)
-                ->with('success', trans('panel::common.updated_success'));
+                ->with('success', panel_trans('common.updated_success'));
         } catch (Exception $e) {
             return redirect(panel_route('admins.index'))
                 ->withErrors(['error' => $e->getMessage()]);
@@ -129,7 +130,7 @@ class AdminController extends BaseController
             AdminRepo::getInstance()->destroy($admin);
 
             return redirect(panel_route('admins.index'))
-                ->with('success', trans('panel::common.deleted_success'));
+                ->with('success', panel_trans('common.deleted_success'));
         } catch (Exception $e) {
             return redirect(panel_route('admins.index'))
                 ->withErrors(['error' => $e->getMessage()]);

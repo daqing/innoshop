@@ -20,6 +20,30 @@ use InnoShop\Common\Services\StateMachineService;
 class OrderRepo extends BaseRepo
 {
     /**
+     * @return array[]
+     */
+    public static function getCriteria(): array
+    {
+        return [
+            ['name' => 'number', 'type' => 'input', 'label' => trans('panel/order.number')],
+            ['name' => 'customer_name', 'type' => 'input', 'label' => trans('panel/order.customer_name')],
+            ['name' => 'email', 'type' => 'input', 'label' => trans('panel/order.email')],
+            ['name' => 'telephone', 'type' => 'input', 'label' => trans('panel/order.telephone')],
+            ['name' => 'shipping_method_name', 'type' => 'input', 'label' => trans('panel/order.shipping_method_name')],
+            ['name' => 'billing_method_name', 'type' => 'input', 'label' => trans('panel/order.billing_method_name')],
+            ['name' => 'status', 'type' => 'input', 'label' => trans('panel/order.status')],
+            ['name'     => 'total', 'type' => 'range', 'label' => trans('panel/order.total'),
+                'start' => ['name' => 'start'],
+                'end'   => ['name' => 'end'],
+            ],
+            ['name'     => 'created_at', 'type' => 'date_range', 'label' => trans('panel/order.created_at'),
+                'start' => ['name' => 'start'],
+                'end'   => ['name' => 'end'],
+            ],
+        ];
+    }
+
+    /**
      * @return array
      */
     public function getFilterStatuses(): array
@@ -78,6 +102,11 @@ class OrderRepo extends BaseRepo
         $number = $filters['number'] ?? '';
         if ($number) {
             $builder->where('number', $number);
+        }
+
+        $customerName = $filters['customer_name'] ?? '';
+        if ($customerName) {
+            $builder->where('customer_name', 'like', "%$customerName%");
         }
 
         $email = $filters['email'] ?? '';
@@ -165,7 +194,7 @@ class OrderRepo extends BaseRepo
             'total'                  => $requestData['total']                ?? 0,
             'locale'                 => $requestData['locale']               ?? front_locale_code(),
             'currency_code'          => $requestData['currency_code']        ?? current_currency_code(),
-            'currency_value'         => $requestData['currency_value']       ?? 1.0,
+            'currency_value'         => $requestData['currency_value']       ?? current_currency()->value,
             'ip'                     => $requestData['ip']                   ?? request()->ip(),
             'user_agent'             => $requestData['user_agent']           ?? request()->userAgent(),
             'status'                 => $requestData['status']               ?? 'created',

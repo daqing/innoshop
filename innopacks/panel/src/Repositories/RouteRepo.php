@@ -52,7 +52,7 @@ class RouteRepo
         foreach ($panelRoutes as $module => $routes) {
             $isSystem = in_array($module, $this->systemModules);
             if ($isSystem) {
-                $label = trans("panel::menu.$module");
+                $label = panel_trans("menu.$module");
             } else {
                 $module = Str::studly(Str::singular($module));
                 $label  = trans("$module::route.title");
@@ -92,6 +92,8 @@ class RouteRepo
             $pluginSpace = $this->getPluginNamespace($controller);
             if (empty($pluginSpace)) {
                 $this->systemModules[] = $routeModule;
+            } else {
+                $routeModule = $pluginSpace;
             }
 
             $routeList[$routeModule][] = [
@@ -136,7 +138,7 @@ class RouteRepo
             if ($pluginSpace) {
                 $label = trans("{$route['plugin_space']}::route.{$routeSlug}");
             } else {
-                $label = trans("panel::route.{$routeSlug}");
+                $label = panel_trans("route.{$routeSlug}");
             }
 
             $items[] = ['route_slug' => $routeSlug, 'label' => $label, 'selected' => $this->hasPermission($routeSlug)];

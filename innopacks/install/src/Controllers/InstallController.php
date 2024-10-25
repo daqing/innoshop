@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\App;
 use InnoShop\Install\Libraries\Checker;
 use InnoShop\Install\Libraries\Creator;
 use InnoShop\Install\Requests\CompleteRequest;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Throwable;
 
 class InstallController extends Controller
@@ -24,6 +26,8 @@ class InstallController extends Controller
     /**
      * @param  Request  $request
      * @return mixed
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      * @throws Exception
      */
     public function index(Request $request): mixed
@@ -32,9 +36,7 @@ class InstallController extends Controller
             return redirect(front_route('home.index'));
         }
 
-        $defaultLocale = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'en', 0, 2);
-        $defaultLocale = ($defaultLocale == 'zh' ? 'zh_cn' : $defaultLocale);
-        $locale        = $request->get('locale', $defaultLocale);
+        $locale = current_install_locale_code();
         App::setLocale($locale);
 
         $data = Checker::getInstance()->getEnvironment();
@@ -42,6 +44,31 @@ class InstallController extends Controller
         $data['locale'] = $locale;
 
         return view('install::installer.index', $data);
+    }
+
+    /**
+     * @param  Request  $request
+     * @return mixed
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function driverDetect(Request $request): mixed
+    {
+        $data           = Checker::getInstance()->getEnvironment();
+        $locale         = current_install_locale_code();
+        $data['locale'] = $locale;
+
+        App::setLocale($locale);
+
+        $dbCode = $request->get('db_code');
+        if ($dbCode == 'mysql') {
+            unset($data['extensions']['pdo_sqlite']);
+            unset($data['extensions']['sqlite3']);
+        } elseif ($dbCode == 'sqlite') {
+            unset($data['extensions']['pdo_mysql']);
+        }
+
+        return view('install::installer._env_check', $data);
     }
 
     /**

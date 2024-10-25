@@ -67,7 +67,7 @@ class Currency
             return $price;
         }
 
-        $currencyRow = $this->currencies[$currency] ?? null;
+        $currencyRow = $this->currencies[strtoupper($currency)] ?? ($this->currencies[strtolower($currency)] ?? null);
         if (empty($currencyRow)) {
             return $price;
         }
@@ -129,5 +129,15 @@ class Currency
         }
 
         return $price * ($to / $from);
+    }
+
+    /**
+     * @param  $price
+     * @param  $rate
+     * @return float|int
+     */
+    public function convertByRate($price, $rate): float|int
+    {
+        return round($price * $rate, 2);
     }
 }

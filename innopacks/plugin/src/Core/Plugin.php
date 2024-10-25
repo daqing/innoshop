@@ -9,12 +9,16 @@
 
 namespace InnoShop\Plugin\Core;
 
+use ArrayAccess;
 use Exception;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use InnoShop\Plugin\Repositories\PluginRepo;
 use InnoShop\Plugin\Repositories\SettingRepo;
 
-final class Plugin
+final class Plugin implements Arrayable, ArrayAccess
 {
     public const TYPES = [
         'billing',
@@ -23,6 +27,7 @@ final class Plugin
         'fee',
         'social',
         'language',
+        'intelli',
     ];
 
     protected string $type;
@@ -58,6 +63,16 @@ final class Plugin
         $this->path        = $path;
         $this->packageInfo = $packageInfo;
         $this->validateConfig();
+    }
+
+    public function __get($name)
+    {
+        return $this->packageInfoAttribute(Str::snake($name, '-'));
+    }
+
+    public function packageInfoAttribute($name)
+    {
+        return Arr::get($this->packageInfo, $name);
     }
 
     /**
@@ -223,7 +238,7 @@ final class Plugin
      */
     public function getLocaleName(): string
     {
-        $currentLocale = locale_code();
+        $currentLocale = plugin_locale_code();
 
         if (is_array($this->name)) {
             if ($this->name[$currentLocale] ?? '') {
@@ -254,7 +269,7 @@ final class Plugin
      */
     public function getLocaleDescription(): string
     {
-        $currentLocale = locale_code();
+        $currentLocale = plugin_locale_code();
 
         if (is_array($this->description)) {
             if ($this->description[$currentLocale] ?? '') {
@@ -340,6 +355,10 @@ final class Plugin
      */
     public function getFields(): array
     {
+        if ($this->getType() == 'billing') {
+            $this->fields[] = SettingRepo::getInstance()->getPluginAvailableField();
+        }
+
         $this->fields[] = SettingRepo::getInstance()->getPluginActiveField();
         $existValues    = SettingRepo::getInstance()->getPluginFields($this->code);
         foreach ($this->fields as $index => $field) {
@@ -419,7 +438,7 @@ final class Plugin
      */
     public function validateFields($requestData): \Illuminate\Validation\Validator
     {
-        $rules = array_column($this->fields, 'rules', 'name');
+        $rules = array_column($this->getFields(), 'rules', 'name');
 
         return Validator::make($requestData, $rules);
     }
@@ -458,5 +477,42 @@ final class Plugin
         }
 
         return $item;
+    }
+
+    /**
+     * @param  $offset
+     * @return bool
+     */
+    public function offsetExists($offset): bool
+    {
+        return Arr::has($this->packageInfo, $offset);
+    }
+
+    /**
+     * @param  $offset
+     * @return mixed
+     */
+    public function offsetGet($offset): mixed
+    {
+        return $this->packageInfoAttribute($offset);
+    }
+
+    /**
+     * @param  $offset
+     * @param  $value
+     * @return array
+     */
+    public function offsetSet($offset, $value): array
+    {
+        return Arr::set($this->packageInfo, $offset, $value);
+    }
+
+    /**
+     * @param  $offset
+     * @return void
+     */
+    public function offsetUnset($offset): void
+    {
+        unset($this->packageInfo[$offset]);
     }
 }

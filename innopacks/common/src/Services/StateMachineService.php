@@ -177,7 +177,7 @@ class StateMachineService
             }
             $result[] = [
                 'status' => $status,
-                'name'   => trans("panel::order.$status"),
+                'name'   => panel_trans("order.$status"),
             ];
         }
 
@@ -185,7 +185,7 @@ class StateMachineService
     }
 
     /**
-     * Get all valid statuses, from paid to completed.
+     * Get all valid statuses, from paid to complete.
      *
      * @return string[]
      */
@@ -219,7 +219,7 @@ class StateMachineService
         foreach ($nextStatusCodes as $status) {
             $result[] = [
                 'status' => $status,
-                'name'   => trans("panel::order.{$status}"),
+                'name'   => trans("panel/order.{$status}"),
             ];
         }
 

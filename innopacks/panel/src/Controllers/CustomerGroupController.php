@@ -28,7 +28,8 @@ class CustomerGroupController
     {
         $filters = $request->all();
         $data    = [
-            'groups' => Customer\GroupRepo::getInstance()->list($filters),
+            'criteria' => Customer\GroupRepo::getCriteria(),
+            'groups'   => Customer\GroupRepo::getInstance()->list($filters),
         ];
 
         return inno_view('panel::customer_groups.index', $data);
@@ -59,7 +60,7 @@ class CustomerGroupController
 
             return redirect(panel_route('groups.index'))
                 ->with('instance', $customerGroup)
-                ->with('success', trans('panel::common.updated_success'));
+                ->with('success', panel_trans('common.updated_success'));
         } catch (Exception $e) {
             return redirect(panel_route('groups.index'))
                 ->withInput()
@@ -104,7 +105,7 @@ class CustomerGroupController
 
             return redirect(panel_route('groups.index'))
                 ->with('instance', $customerGroup)
-                ->with('success', trans('panel::common.updated_success'));
+                ->with('success', panel_trans('common.updated_success'));
         } catch (Exception $e) {
             return redirect(panel_route('groups.index'))
                 ->withInput()
@@ -122,7 +123,7 @@ class CustomerGroupController
             Customer\GroupRepo::getInstance()->destroy($customerGroup);
 
             return redirect(panel_route('groups.index'))
-                ->with('success', trans('panel::common.deleted_success'));
+                ->with('success', panel_trans('common.deleted_success'));
         } catch (Exception $e) {
             return redirect(panel_route('groups.index'))
                 ->withErrors(['error' => $e->getMessage()]);

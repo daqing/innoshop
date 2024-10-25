@@ -1,6 +1,6 @@
 @extends('panel::layouts.app')
 
-@section('title', __('panel::menu.plugins'))
+@section('title', __('panel/menu.plugins'))
 
 <x-panel::form.right-btns />
 
@@ -57,7 +57,8 @@
                 :name="$field['name']"
                 :title="$field['label']"
                 :value="old($field['name'], $field['value'] ?? '')"
-                :options="$field['options']">
+                :options="$field['options']"
+                :emptyOption="$field['emptyOption'] ?? true" >
                 @if (isset($field['description']))
                   <div class="help-text font-size-12 lh-base">{{ $field['description'] }}</div>
                 @endif
@@ -136,7 +137,7 @@
                       class="form-check-input"
                       name="{{ $field['name'] }}[]"
                       type="checkbox"
-                      value="{{ old($field['name'], $item['value']) }}"
+                      value="{{ $item['value'] }}"
                       {{ in_array($item['value'], old($field['name'], json_decode($field['value'] ?? '[]', true))) ? 'checked' : '' }}
                       id="flexCheck-{{ $field['name'] }}-{{ $loop->index }}">
                     <label class="form-check-label" for="flexCheck-{{ $field['name'] }}-{{ $loop->index }}">

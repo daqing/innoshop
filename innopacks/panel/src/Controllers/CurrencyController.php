@@ -29,6 +29,7 @@ class CurrencyController extends BaseController
     {
         $filters = $request->all();
         $data    = [
+            'criteria'   => CurrencyRepo::getCriteria(),
             'currencies' => CurrencyRepo::getInstance()->list($filters),
         ];
 
@@ -66,7 +67,7 @@ class CurrencyController extends BaseController
             $data = $request->all();
             CurrencyRepo::getInstance()->create($data);
 
-            return json_success(trans('panel::common.saved_success'));
+            return json_success(panel_trans('common.saved_success'));
         } catch (Exception $e) {
             return json_fail($e->getMessage());
         }
@@ -107,7 +108,7 @@ class CurrencyController extends BaseController
             $data = $request->all();
             CurrencyRepo::getInstance()->update($currency, $data);
 
-            return json_success(trans('panel::common.updated_success'));
+            return json_success(panel_trans('common.updated_success'));
         } catch (Exception $e) {
             return json_fail($e->getMessage());
         }
@@ -121,12 +122,12 @@ class CurrencyController extends BaseController
     {
         try {
             if ($currency->code == system_setting('currency')) {
-                throw new \Exception('Cannot delete default currency');
+                throw new Exception(panel_trans('currency.cannot_delete_default_currency'));
             }
             CurrencyRepo::getInstance()->destroy($currency);
 
             return redirect(panel_route('currencies.index'))
-                ->with('success', trans('panel::common.deleted_success'));
+                ->with('success', panel_trans('common.deleted_success'));
         } catch (Exception $e) {
             return redirect(panel_route('currencies.index'))
                 ->withErrors(['error' => $e->getMessage()]);

@@ -10,10 +10,13 @@
 namespace InnoShop\Front\Controllers;
 
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Http\Request;
 use InnoShop\Common\Models\Product;
 use InnoShop\Common\Repositories\CategoryRepo;
 use InnoShop\Common\Repositories\ProductRepo;
+use InnoShop\Common\Repositories\ReviewRepo;
+use InnoShop\Common\Resources\ReviewListItem;
 use InnoShop\Common\Resources\SkuListItem;
 
 class ProductController extends Controller
@@ -21,6 +24,7 @@ class ProductController extends Controller
     /**
      * @param  Request  $request
      * @return mixed
+     * @throws Exception
      */
     public function index(Request $request): mixed
     {
@@ -54,6 +58,7 @@ class ProductController extends Controller
     /**
      * @param  Request  $request
      * @return mixed
+     * @throws Exception
      */
     public function slugShow(Request $request): mixed
     {
@@ -81,6 +86,7 @@ class ProductController extends Controller
         }
 
         $product->increment('viewed');
+        $reviews = ReviewRepo::getInstance()->getListByProduct($product);
 
         $data = [
             'product'    => $product,
@@ -88,6 +94,7 @@ class ProductController extends Controller
             'skus'       => SkuListItem::collection($product->skus)->jsonSerialize(),
             'variants'   => $product->variables,
             'attributes' => $product->groupedAttributes(),
+            'reviews'    => ReviewListItem::collection($reviews)->jsonSerialize(),
         ];
 
         return inno_view('products.show', $data);

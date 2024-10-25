@@ -10,6 +10,12 @@ window.inno = common;
 import dominateColor from "./dominate_color";
 window.dominateColor = dominateColor;
 
+$.ajaxSetup({
+  headers: {
+    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+  }
+});
+
 $(function () {
   tinymceInit();
 
@@ -41,6 +47,29 @@ $(function () {
     if (!$(e.target).parents(".sidebar-body").length) {
       $(".sidebar-box").removeClass("active");
     }
+  });
+
+  $('.ai-generate').on("click", function (e) {
+    let accordionBody = $(this).closest('.accordion-body');
+    let formRow = $(this).closest('.form-row');
+    let inputEle = formRow.find(':input');
+
+    let formData = {
+      locale_code: accordionBody.data('locale-code'),
+      locale_name: accordionBody.data('locale-name'),
+      column_name:$(this).data('column'),
+      column_value: inputEle.val()
+    };
+
+    layer.load(2, {shade: [0.3,'#fff'] })
+    axios.post(urls.ai_generate, formData, {}).then(function (res) {
+      let message = res.data.message;
+      inputEle.val(message);
+    }).catch(function (err) {
+      layer.msg(err.response.data.message, {icon: 2});
+    }).finally(function () {
+      layer.closeAll('loading');
+    });
   });
 
   $(document).on('focus', '.date input, .datetime input, .time input', function(event) {
@@ -96,7 +125,7 @@ const tinymceInit = () => {
             formData.append('image', file);
             formData.append('type', 'common');
             layer.load(2, {shade: [0.3,'#fff'] })
-            axios.post('/upload/images', formData, {}).then(function (res) {
+            axios.post(urls.upload_images, formData, {}).then(function (res) {
                 let url = res.data.url;
                 ed.insertContent('<img src="' + url + '" class="img-fluid" />');
             }).catch(function (err) {

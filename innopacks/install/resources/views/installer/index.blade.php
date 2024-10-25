@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <base href="{{ url('/') }}">
-  <title>{{ __('install::common.install_wizard') }}</title>
+  <title>{{ __('install/common.install_wizard') }}</title>
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <link rel="shortcut icon" href="{{ image_origin(system_setting('favicon', 'images/favicon.png')) }}">
   <link rel="stylesheet" href="{{ asset('build/css/bootstrap.css') }}">
@@ -24,12 +24,13 @@
     <div class="dropdown">
       <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
               aria-expanded="false">
-        {{ __('install::common.'.$locale) }}
+        {{ current_install_locale()['name'] }}
       </button>
       <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="{{ route('install.install.index', ['locale' => 'zh_cn']) }}">中文</a></li>
-        <li><a class="dropdown-item" href="{{ route('install.install.index', ['locale' => 'en']) }}">English</a></li>
-        <li><a class="dropdown-item" href="{{ route('install.install.index', ['locale' => 'es']) }}">Español</a></li>
+        @foreach(install_locales() as $item)
+          <li><a class="dropdown-item"
+                 href="{{ route('install.install.index', ['locale' => $item['code']]) }}">{{ $item['name'] }}</a></li>
+        @endforeach
       </ul>
     </div>
   </div>
@@ -39,205 +40,179 @@
     <ul class="progress-wrap">
       <li class="active">
         <div class="icon"><span>1</span></div>
-        <div class="text">{{ __('install::common.license') }}</div>
+        <div class="text">{{ __('install/common.license') }}</div>
       </li>
       <li>
         <div class="icon"><span>2</span></div>
-        <div class="text">{{ __('install::common.environment') }}</div>
+        <div class="text">{{ __('install/common.environment') }}</div>
       </li>
       <li>
         <div class="icon"><span>3</span></div>
-        <div class="text">{{ __('install::common.configuration') }}</div>
+        <div class="text">{{ __('install/common.configuration') }}</div>
       </li>
       <li>
         <div class="icon"><span>4</span></div>
-        <div class="text">{{ __('install::common.completed') }}</div>
+        <div class="text">{{ __('install/common.completed') }}</div>
       </li>
     </ul>
     <div class="install-wrap">
       <div class="install-1 install-item active">
-        <div class="head-title">{{ __('install::common.open_source') }}</div>
+        <div class="head-title">{{ __('install/common.open_source') }}</div>
         <div class="install-content" id="content">
-          @include("install::license.".$locale)
+          @if (view()->exists("install::license.{$locale}"))
+            @include("install::license.{$locale}")
+          @else
+            @include("install::license.en")
+          @endif
         </div>
 
         <div class="d-flex justify-content-center mt-4">
-          <button type="button" class="btn btn-primary btn-lg next-btn">{{ __('install::common.i_agree') }}</button>
+          <button type="button" class="btn btn-primary btn-lg next-btn">{{ __('install/common.i_agree') }}</button>
         </div>
       </div>
 
       <div class="install-2 install-item d-none">
-        <div class="head-title">{{ __('install::common.env_detection') }}</div>
-        <div class="install-content">
-          <table class="table">
-            <thead>
-            <tr>
-              <th colspan="3" class="bg-light">{{ __('install::common.env_detection') }}</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-              <td>{{ __('install::common.environment') }}</td>
-              <td>{{ __('install::common.current') }}</td>
-              <td>{{ __('install::common.status') }}</td>
-            </tr>
-            <tr>
-              <td>{{ __('install::common.php_version') }}(8.2+)</td>
-              <td>{{ $php_version }}</td>
-              <td><i
-                    class="bi {{ $php_env ? 'text-success bi-check-circle-fill' : 'bi-x-circle-fill text-danger' }}"></i>
-              </td>
-            </tr>
-            @foreach($extensions as $key => $value)
-              <tr>
-                <td>{{ $key }}</td>
-                <td></td>
-                <td><i
-                      class="bi {{ $value ? 'text-success bi-check-circle-fill' : 'bi-x-circle-fill text-danger' }}"></i>
-                </td>
-              </tr>
-            @endforeach
 
-            </tbody>
+        <div class="head-title">
+          <div class="row">
+            <div class="col-6">{{ __('install/common.env_detection') }}</div>
+            <div class="col-6">
+              <div class="row">
+                <div class="col-8 text-end"><span class="driver">{{ __('install/common.db_driver') }}:</span></div>
+                <div class="col-4">
+                  <select id="db-driver" class="form-select form-select-sm">
+                    <option value="mysql" selected>MySQL</option>
+                    <option value="sqlite">SQLite</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-            <thead>
-            <tr>
-              <th colspan="3" class="bg-light">{{ __('install::common.perm_detection') }}</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-              <td>{{ __('install::common.dir_file') }}</td>
-              <td>{{ __('install::common.config') }}</td>
-              <td>{{ __('install::common.status') }}</td>
-            </tr>
-            @foreach($permissions as $key => $value)
-              <tr>
-                <td>{{ $key }}</td>
-                <td>755</td>
-                <td><i
-                      class="bi {{ $value ? 'text-success bi-check-circle-fill' : 'bi-x-circle-fill text-danger' }}"></i>
-                </td>
-              </tr>
-            @endforeach
-            </tbody>
-          </table>
+        <div class="install-content env-check">
+          @include('install::installer._env_check')
         </div>
 
         <div class="d-flex justify-content-center mt-4">
-          <button type="button" class="btn btn-outline-secondary prev-btn me-3">{{ __('install::common.previous_step') }}</button>
-          <button type="button" disabled class="btn btn-primary next-btn">{{ __('install::common.next_step') }}</button>
+          <button type="button"
+                  class="btn btn-outline-secondary prev-btn me-3">{{ __('install/common.previous_step') }}</button>
+          <button type="button" disabled class="btn btn-primary next-btn">{{ __('install/common.next_step') }}</button>
         </div>
       </div>
 
       <div class="install-3 install-item d-none">
-        <div class="head-title">{{ __('install::common.param_config') }}</div>
+        <div class="head-title">{{ __('install/common.param_config') }}</div>
         <div class="install-content">
           <form class="needs-validation" novalidate>
-            <div class="bg-light py-2 mb-2 text-center fw-bold">{{ __('install::common.db_config') }}</div>
+            <input type="hidden" name="db_type" value="">
+            <div class="bg-light py-2 mb-2 text-center fw-bold">{{ __('install/common.db_config') }}</div>
             <div class="row gx-2">
               <div class="col-6">
                 <div class="mb-3">
-                  <label for="type" class="form-label">{{ __('install::common.db_type') }}</label>
+                  <label for="type" class="form-label">{{ __('install/common.db_type') }}</label>
                   <select class="form-select sql-type" id="type" name="type" required>
                     <option value="sqlite">SQLite</option>
                     <option value="mysql">MySQL</option>
                   </select>
-                  <div class="invalid-feedback">{{ __('install::common.select_db_type') }}</div>
+                  <div class="invalid-feedback">{{ __('install/common.select_db_type') }}</div>
                 </div>
               </div>
               <div class="col-6 mysql-item">
                 <div class="mb-3">
-                  <label for="host" class="form-label">{{ __('install::common.host_address') }}</label>
-                  <input type="text" class="form-control" id="host" name="db_hostname" required placeholder="{{ __('install::common.host') }}"
+                  <label for="host" class="form-label">{{ __('install/common.host_address') }}</label>
+                  <input type="text" class="form-control" id="host" name="db_hostname" required
+                         placeholder="{{ __('install/common.host') }}"
                          value="127.0.0.1">
-                  <div class="invalid-feedback">{{ __('install::common.host') }}</div>
+                  <div class="invalid-feedback">{{ __('install/common.host') }}</div>
                 </div>
               </div>
               <div class="col-6 mysql-item">
                 <div class="mb-3">
-                  <label for="port" class="form-label">{{ __('install::common.port_number') }}</label>
-                  <input type="text" class="form-control" id="port" name="db_port" required placeholder="{{ __('install::common.port') }}"
+                  <label for="port" class="form-label">{{ __('install/common.port_number') }}</label>
+                  <input type="text" class="form-control" id="port" name="db_port" required
+                         placeholder="{{ __('install/common.port') }}"
                          value="3306">
-                  <div class="invalid-feedback">{{ __('install::common.port') }}</div>
+                  <div class="invalid-feedback">{{ __('install/common.port') }}</div>
                 </div>
               </div>
               <div class="col-6 mysql-item">
                 <div class="mb-3">
-                  <label for="database" class="form-label">{{ __('install::common.db_name') }}</label>
+                  <label for="database" class="form-label">{{ __('install/common.db_name') }}</label>
                   <input type="text" class="form-control" id="database" name="db_name" required value="innoshop"
-                         placeholder="{{ __('install::common.db_name') }}">
-                  <div class="invalid-feedback">{{ __('install::common.db_name') }}</div>
+                         placeholder="{{ __('install/common.db_name') }}">
+                  <div class="invalid-feedback">{{ __('install/common.db_name') }}</div>
                 </div>
               </div>
               <div class="col-6 mysql-item">
                 <div class="mb-3">
-                  <label for="database" class="form-label">{{ __('install::common.table_prefix') }}</label>
+                  <label for="database" class="form-label">{{ __('install/common.table_prefix') }}</label>
                   <input type="text" class="form-control" id="db_prefix" name="db_prefix" value="inno_" required
-                         placeholder="{{ __('install::common.table_prefix') }}">
-                  <div class="invalid-feedback">{{ __('install::common.table_prefix') }}</div>
+                         placeholder="{{ __('install/common.table_prefix') }}">
+                  <div class="invalid-feedback">{{ __('install/common.table_prefix') }}</div>
                 </div>
               </div>
               <div class="col-6 mysql-item">
                 <div class="mb-3">
-                  <label for="username" class="form-label">{{ __('install::common.db_account') }}</label>
+                  <label for="username" class="form-label">{{ __('install/common.db_account') }}</label>
                   <input type="text" class="form-control" id="username" name="db_username" required
-                         placeholder="{{ __('install::common.db_account') }}">
-                  <div class="invalid-feedback">{{ __('install::common.db_account') }}</div>
+                         placeholder="{{ __('install/common.db_account') }}">
+                  <div class="invalid-feedback">{{ __('install/common.db_account') }}</div>
                 </div>
               </div>
               <div class="col-6 mysql-item">
                 <div class="mb-3">
-                  <label for="password" class="form-label">{{ __('install::common.db_password') }}</label>
+                  <label for="password" class="form-label">{{ __('install/common.db_password') }}</label>
                   <input type="password" class="form-control" id="password" name="db_password"
-                         placeholder="{{ __('install::common.db_password') }}">
-                  <div class="invalid-feedback">{{ __('install::common.db_password') }}</div>
+                         placeholder="{{ __('install/common.db_password') }}">
+                  <div class="invalid-feedback">{{ __('install/common.db_password') }}</div>
                 </div>
               </div>
             </div>
 
             <div class="admin-setting d-none">
-              <div class="bg-light py-2 mb-2 text-center fw-bold">{{ __('install::common.admin_config') }}</div>
+              <div class="bg-light py-2 mb-2 text-center fw-bold">{{ __('install/common.admin_config') }}</div>
               <div class="row">
                 <div class="col-6">
                   <div class="mb-3">
-                    <label for="admin_email" class="form-label">{{ __('install::common.admin_account') }}</label>
+                    <label for="admin_email" class="form-label">{{ __('install/common.admin_account') }}</label>
                     <input type="text" class="form-control" id="admin_email" name="admin_email" required
-                           placeholder="{{ __('install::common.admin_account') }}" value="root@innoshop.com">
-                    <div class="invalid-feedback">{{ __('install::common.admin_account') }}</div>
+                           placeholder="{{ __('install/common.admin_account') }}" value="root@innoshop.com">
+                    <div class="invalid-feedback">{{ __('install/common.admin_account') }}</div>
                   </div>
                 </div>
                 <div class="col-6">
                   <div class="mb-3">
-                    <label for="admin_password" class="form-label">{{ __('install::common.admin_password') }}</label>
+                    <label for="admin_password" class="form-label">{{ __('install/common.admin_password') }}</label>
                     <input type="password" class="form-control" id="admin_password" name="admin_password" required
-                           placeholder="{{ __('install::common.admin_password') }}">
-                    <div class="invalid-feedback">{{ __('install::common.admin_password') }}</div>
+                           placeholder="{{ __('install/common.admin_password') }}">
+                    <div class="invalid-feedback">{{ __('install/common.admin_password') }}</div>
                   </div>
                 </div>
               </div>
             </div>
-            <button type="submit" class="d-none">{{ __('install::common.next_step') }}</button>
+            <button type="submit" class="d-none">{{ __('install/common.next_step') }}</button>
           </form>
         </div>
 
         <div class="d-flex justify-content-center mt-4">
-          <button type="button" class="btn btn-outline-secondary prev-btn me-3">{{ __('install::common.previous_step') }}</button>
-          <button type="button" disabled class="btn btn-primary next-btn">{{ __('install::common.next_step') }}</button>
+          <button type="button"
+                  class="btn btn-outline-secondary prev-btn me-3">{{ __('install/common.previous_step') }}</button>
+          <button type="button" disabled class="btn btn-primary next-btn">{{ __('install/common.next_step') }}</button>
         </div>
       </div>
 
       <div class="install-4 install-item install-success d-none">
-        <div class="head-title">{{ __('install::common.install_complete') }}</div>
+        <div class="head-title">{{ __('install/common.install_complete') }}</div>
         <div class="install-content">
           <div class="icon"><img src="{{ asset('icon/install-icon-4.svg') }}" class="img-fluid"></div>
           <div class="success-text">
-            {{ __('install::common.congratulations') }}
+            {{ __('install/common.congratulations') }}
           </div>
         </div>
         <div class="d-flex justify-content-center mt-4">
-          <a href="{{ url('/') }}" class="btn btn-primary me-3">{{ __('install::common.visit_frontend') }}</a>
-          <a href="{{ url('/panel') }}" class="btn btn-primary">{{ __('install::common.visit_backend') }}</a>
+          <a href="{{ url('/') }}" class="btn btn-primary me-3">{{ __('install/common.visit_frontend') }}</a>
+          <a href="{{ url('/panel') }}" class="btn btn-primary">{{ __('install/common.visit_backend') }}</a>
         </div>
       </div>
     </div>
@@ -245,6 +220,27 @@
 </div>
 
 <script>
+  $('#db-driver').change(function () {
+    let code = $(this).val();
+    layer.load(2, {shade: [0.3, '#fff']})
+    $.ajax({
+      url: '{{ $driver_url }}',
+      type: "POST",
+      data: {db_code: code, locale: '{{current_install_locale()['code']}}'},
+      success: function (response) {
+        $('.env-check').html(response);
+        console.log("Success: ", response);
+      },
+      error: function (xhr, status, error) {
+        console.log("Error: ", status, error);
+        layer.msg(error);
+      },
+      complete: function () {
+        layer.closeAll('loading');
+      }
+    });
+  });
+
   $('.next-btn').click(function () {
     var current = $('.install-item').filter('.active');
     var next = current.next('.install-item');
@@ -257,7 +253,8 @@
     }
 
     if (next.hasClass('install-3')) {
-      $('.sql-type').trigger('change');
+      $('input[name="db_type"]').val($('#db-driver').val());
+      $('.sql-type').val($('#db-driver').val()).prop('disabled', 'disabled').trigger('change');
     }
 
     if (current.hasClass('install-3')) {
@@ -278,7 +275,6 @@
     activeStep(current, next);
   });
 
-  // 上一步
   $('.prev-btn').click(function () {
     var current = $('.install-item').filter('.active');
     var prev = current.prev('.install-item');
@@ -356,25 +352,25 @@
   }
 
   function checkComplete(data, callback) {
-    layer.load(2, {shade: [0.3,'#fff'] })
+    layer.load(2, {shade: [0.3, '#fff']})
     $('.is-invalid').removeClass('is-invalid').next('.invalid-feedback').text('');
     $.ajax({
       url: '/install/complete',
       type: 'POST',
       data: data,
-      success: function(res) {
+      success: function (res) {
         if (res.success) {
           callback(res);
         }
       },
-      error: function(res) {
+      error: function (res) {
         const errors = res.responseJSON.errors;
-        Object.keys(errors).forEach(function(key) {
+        Object.keys(errors).forEach(function (key) {
           $('input[name="' + key + '"]').addClass('is-invalid').next('.invalid-feedback').text(errors[key][0]);
         });
         layer.msg(res.responseJSON.message);
       },
-      complete: function() {
+      complete: function () {
         layer.closeAll('loading');
       }
     });
@@ -382,7 +378,7 @@
 
   function checkStatus() {
     var flag = true;
-    $('.install-2 table .bi').each(function() {
+    $('.install-2 table .bi').each(function () {
       if ($(this).hasClass('text-danger')) {
         flag = false;
       }
@@ -391,18 +387,16 @@
     if (flag) {
       $('.install-2 .next-btn').prop('disabled', false);
     } else {
-      layer.msg('{{ __('install::common.check_system') }}');
+      layer.msg('{{ __('install/common.check_system') }}');
     }
   }
 
-  // 激活状态
   function activeStep(current, next) {
     var index = next.index();
-    // 删除所有步骤的 active 状态
+
     $('.progress-wrap li').removeClass('complete active');
     $('.install-wrap .install-item').removeClass('active').addClass('d-none');
 
-    // index 步骤之前的步骤添加 complete 状态
     $('.progress-wrap li').each(function (i) {
       if (i < index) {
         $(this).addClass('complete active');

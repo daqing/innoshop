@@ -23,9 +23,32 @@ class SettingRepo extends CommonSettingRepo
     {
         return [
             'name'     => 'active',
-            'label'    => trans('panel::common.status'),
+            'label'    => panel_trans('common.status'),
             'type'     => 'bool',
             'required' => true,
+        ];
+    }
+
+    /**
+     * Get billing plugin available field.
+     *
+     * @return array
+     */
+    public function getPluginAvailableField(): array
+    {
+        return [
+            'name'    => 'available',
+            'label'   => panel_trans('common.available'),
+            'type'    => 'checkbox',
+            'options' => [
+                ['label' => 'PC WEB', 'value' => 'pc_web'],
+                ['label' => 'Mobile Web', 'value' => 'mobile_web'],
+                ['label' => 'WeChat Mini', 'value' => 'wechat_mini'],
+                ['label' => 'WeChat Official', 'value' => 'wechat_official'],
+                ['label' => 'APP', 'value' => 'app'],
+            ],
+            'required' => true,
+            'rules'    => 'required',
         ];
     }
 

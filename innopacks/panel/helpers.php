@@ -75,6 +75,22 @@ if (! function_exists('current_panel_locale')) {
     }
 }
 
+if (! function_exists('panel_locale_direction')) {
+    /**
+     * Get locale direction for panel admin.
+     *
+     * @return string
+     * @throws Exception
+     */
+    function panel_locale_direction(): string
+    {
+        $localeCode = panel_locale_code();
+        $rtlCodes   = array_keys(\InnoShop\Common\Repositories\LocaleRepo::getRtlLanguages());
+
+        return in_array($localeCode, $rtlCodes) ? 'rtl' : 'ltr';
+    }
+}
+
 if (! function_exists('panel_lang_path_codes')) {
     /**
      * Get all panel languages
@@ -83,27 +99,26 @@ if (! function_exists('panel_lang_path_codes')) {
      */
     function panel_lang_path_codes(): array
     {
-        $languageDir = panel_lang_dir();
+        $packages = language_codes();
 
-        return array_values(array_diff(scandir($languageDir), ['..', '.', '.DS_Store']));
+        $panelLangCodes = collect($packages)->filter(function ($code) {
+            return file_exists(lang_path("{$code}/panel"));
+        })->toArray();
+
+        return array_values($panelLangCodes);
     }
 }
 
-if (! function_exists('panel_lang_dir')) {
+if (! function_exists('panel_trans')) {
     /**
-     * Get all panel languages
-     *
-     * @return string
+     * @param  $key
+     * @param  array  $replace
+     * @param  $locale
+     * @return mixed
      */
-    function panel_lang_dir(): string
+    function panel_trans($key = null, array $replace = [], $locale = null): mixed
     {
-        if (is_dir(lang_path('vendor/panel'))) {
-            $languageDir = lang_path('vendor/panel');
-        } else {
-            $languageDir = inno_path('panel/lang');
-        }
-
-        return $languageDir;
+        return trans('panel/'.$key, $replace, $locale);
     }
 }
 
@@ -150,6 +165,49 @@ if (! function_exists('is_admin')) {
         $uri       = request()->getRequestUri();
         if (Str::startsWith($uri, "/{$adminName}")) {
             return true;
+        }
+
+        return false;
+    }
+}
+
+if (! function_exists('dashboard_url')) {
+    /**
+     * Get dashboard url
+     * like https://www.innoshop.com/install/dashboard.jpg?version=1.0.0&build_date=20250909
+     *
+     * @return string
+     */
+    function dashboard_url(): string
+    {
+        $params = [
+            'base_url'   => panel_route('home.index'),
+            'version'    => config('innoshop.version'),
+            'build_date' => config('innoshop.build'),
+        ];
+        $urlParams = http_build_query($params);
+
+        return config('innoshop.api_url').'/install/dashboard.jpg?'.$urlParams;
+    }
+}
+
+if (! function_exists('has_set_value')) {
+    /**
+     * Verify if any fields in the current parameters have been assigned a value.
+     *
+     * @param  $parameters
+     * @return bool
+     */
+    function has_set_value($parameters): bool
+    {
+        $ignoreList = ['page', 'per_page'];
+        foreach ($parameters as $key => $value) {
+            if (in_array($key, $ignoreList)) {
+                continue;
+            }
+            if (! is_null($value)) {
+                return true;
+            }
         }
 
         return false;

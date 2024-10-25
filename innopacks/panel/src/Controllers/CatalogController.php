@@ -27,6 +27,7 @@ class CatalogController extends BaseController
     {
         $filters = $request->all();
         $data    = [
+            'criteria' => CatalogRepo::getCriteria(),
             'catalogs' => CatalogRepo::getInstance()->list($filters),
         ];
 
@@ -57,7 +58,7 @@ class CatalogController extends BaseController
 
             return redirect(panel_route('catalogs.index'))
                 ->with('instance', $catalog)
-                ->with('success', trans('panel::common.updated_success'));
+                ->with('success', panel_trans('common.updated_success'));
         } catch (\Exception $e) {
             return redirect(panel_route('catalogs.index'))
                 ->withInput()
@@ -104,7 +105,7 @@ class CatalogController extends BaseController
 
             return redirect(panel_route('catalogs.index'))
                 ->with('instance', $catalog)
-                ->with('success', trans('panel::common.updated_success'));
+                ->with('success', panel_trans('common.updated_success'));
         } catch (\Exception $e) {
             return redirect(panel_route('catalogs.index'))
                 ->withInput()
@@ -122,7 +123,7 @@ class CatalogController extends BaseController
             CatalogRepo::getInstance()->destroy($catalog);
 
             return redirect(panel_route('catalogs.index'))
-                ->with('success', trans('panel::common.deleted_success'));
+                ->with('success', panel_trans('common.deleted_success'));
         } catch (\Exception $e) {
             return redirect(panel_route('catalogs.index'))
                 ->withErrors(['error' => $e->getMessage()]);

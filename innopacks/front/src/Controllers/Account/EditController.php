@@ -34,11 +34,11 @@ class EditController extends Controller
         try {
             $data     = $request->only(['avatar', 'name', 'email']);
             $customer = current_customer();
-            CustomerRepo::getInstance()->update($customer, $data);
+            CustomerRepo::getInstance()->updateProfile($customer, $data);
 
             return redirect(account_route('edit.index'))
                 ->with('instance', $customer)
-                ->with('success', trans('front::common.updated_success'));
+                ->with('success', front_trans('common.updated_success'));
 
         } catch (Exception $e) {
             return redirect(account_route('edit.index'))

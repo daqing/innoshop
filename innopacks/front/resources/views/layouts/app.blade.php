@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ front_locale_direction() }}">
 
 <head>
   <meta charset="utf-8">
@@ -18,6 +18,8 @@
   <link rel="stylesheet" href="{{ mix('themes/default/css/app.css') }}">
   <script>
     let urls = {
+      base_url: '{{ front_route('home.index') }}',
+      upload_images: '{{ front_route('upload.images') }}',
       cart_add: '{{ front_route('carts.store') }}',
       cart_mini: '{{ front_route('carts.mini') }}',
       login: '{{ front_route('login.index') }}',

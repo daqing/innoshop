@@ -31,7 +31,7 @@ class AddressRepo extends BaseRepo
         foreach (self::ADDRESS_TYPES as $type) {
             $items[] = [
                 'code'  => $type,
-                'label' => trans('panel::address.'.$type),
+                'label' => panel_trans('address.'.$type),
             ];
         }
 
@@ -129,6 +129,7 @@ class AddressRepo extends BaseRepo
             'customer_id' => $requestData['customer_id'] ?? 0,
             'guest_id'    => $requestData['guest_id']    ?? '',
             'name'        => $requestData['name'],
+            'email'       => $requestData['email'] ?? '',
             'phone'       => $requestData['phone'],
             'country_id'  => $requestData['country_id'] ?? ($countryRow->id ?? 0),
             'state_id'    => $stateRow->id              ?? 0,

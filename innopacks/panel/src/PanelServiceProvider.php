@@ -31,6 +31,7 @@ class PanelServiceProvider extends ServiceProvider
     {
         load_settings();
         $this->registerGuard();
+        $this->registerUploadFileSystem();
         $this->registerCommands();
         $this->registerWebRoutes();
         $this->loadTranslations();
@@ -59,6 +60,30 @@ class PanelServiceProvider extends ServiceProvider
         Config::set('auth.guards.admin', [
             'driver'   => 'session',
             'provider' => 'admin',
+        ]);
+    }
+
+    /**
+     * @return void
+     */
+    protected function registerUploadFileSystem(): void
+    {
+        Config::set('filesystems.disks.catalog', [
+            'driver'      => 'local',
+            'root'        => public_path('catalog'),
+            'url'         => env('APP_URL').'/catalog',
+            'visibility'  => 'public',
+            'throw'       => true,
+            'permissions' => [
+                'file' => [
+                    'public'  => 0755,
+                    'private' => 0755,
+                ],
+                'dir' => [
+                    'public'  => 0755,
+                    'private' => 0755,
+                ],
+            ],
         ]);
     }
 
@@ -102,6 +127,10 @@ class PanelServiceProvider extends ServiceProvider
      */
     private function loadTranslations(): void
     {
+        if (! is_dir(__DIR__.'/../lang')) {
+            return;
+        }
+
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'panel');
         $this->publishes([
             __DIR__.'/../lang' => $this->app->langPath('vendor/panel'),
@@ -116,6 +145,7 @@ class PanelServiceProvider extends ServiceProvider
     private function loadViewComponents(): void
     {
         $this->loadViewComponentsAs('panel', [
+            'criteria'               => Components\Criteria::class,
             'sidebar'                => Components\Sidebar::class,
             'chart-line'             => Components\Charts\Line::class,
             'form-codemirror'        => Components\Forms\Codemirror::class,

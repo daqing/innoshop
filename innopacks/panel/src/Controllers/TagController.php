@@ -26,7 +26,8 @@ class TagController extends BaseController
     {
         $filters = $request->all();
         $data    = [
-            'tags' => TagRepo::getInstance()->list($filters),
+            'criteria' => TagRepo::getCriteria(),
+            'tags'     => TagRepo::getInstance()->list($filters),
         ];
 
         return inno_view('panel::tags.index', $data);
@@ -57,7 +58,7 @@ class TagController extends BaseController
             $data = $request->all();
             TagRepo::getInstance()->create($data);
 
-            return back()->with('success', trans('panel::common.updated_success'));
+            return back()->with('success', panel_trans('common.updated_success'));
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
@@ -87,7 +88,7 @@ class TagController extends BaseController
             $data = $request->all();
             TagRepo::getInstance()->update($tag, $data);
 
-            return back()->with('success', trans('panel::common.updated_success'));
+            return back()->with('success', panel_trans('common.updated_success'));
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
@@ -102,7 +103,7 @@ class TagController extends BaseController
         try {
             TagRepo::getInstance()->destroy($tag);
 
-            return back()->with('success', trans('panel::common.deleted_success'));
+            return back()->with('success', panel_trans('common.deleted_success'));
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }

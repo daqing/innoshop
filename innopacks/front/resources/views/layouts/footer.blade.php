@@ -23,7 +23,7 @@
               <div class="col-12 col-md-4 footer-item">
                 <div class="footer-links">
                   <div class="footer-link-title">
-                    <span>{{ __('front::common.products') }}</span>
+                    <span>{{ __('front/common.products') }}</span>
                     <div class="footer-link-icon"><i class="bi bi-plus-lg"></i></div>
                   </div>
                   <ul class="footer-item-content">
@@ -36,7 +36,7 @@
               <div class="col-12 col-md-4 footer-item">
                 <div class="footer-links">
                   <div class="footer-link-title">
-                    <span>{{ __('front::common.news') }}</span>
+                    <span>{{ __('front/common.news') }}</span>
                     <div class="footer-link-icon"><i class="bi bi-plus-lg"></i></div>
                   </div>
                   <ul class="footer-item-content">
@@ -49,7 +49,7 @@
               <div class="col-12 col-md-4 footer-item">
                 <div class="footer-links">
                   <div class="footer-link-title">
-                    <span>{{ __('front::common.pages') }}</span>
+                    <span>{{ __('front/common.pages') }}</span>
                     <div class="footer-link-icon"><i class="bi bi-plus-lg"></i></div>
                   </div>
                   <ul class="footer-item-content">
@@ -68,8 +68,9 @@
           <div class="col-md-6">
             <div class="left-links">
               Powered By <a href="https://www.innoshop.com" target="_blank">InnoShop</a>
+              <!-- Powered By InnoShop {{ innoshop_version() }} -->
               <span class="copyright-text">
-                <a href="https://www.innoshop.com" class="ms-2" target="_blank">InnoShop</a>
+                <a href="{{ front_route('home.index') }}" class="ms-2" target="_blank">{{ config('app.name') }}</a>
                 &copy; {{ date('Y') }} All Rights Reserved
                 @if(system_setting('icp_number'))
                   <a href="https://beian.miit.gov.cn" class="ms-2" target="_blank">{{ system_setting('icp_number') }}</a>

@@ -27,7 +27,7 @@
       </div>
     </div>
     <span class="text-muted" style="font-size: 12px">
-      <i class="bi bi-info-circle"></i> {{ __('panel::common.up_image_text') }}
+      <i class="bi bi-info-circle"></i> {{ __('panel/common.up_image_text') }}
       @if ($max)
       ，最多上传(<span class="imgs-count">{{ count($values) }}</span>/{{ $max }})张
       @endif
@@ -43,7 +43,7 @@
       <div class="modal-body"></div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('panel::common.close') }}</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('panel/common.close') }}</button>
       </div>
     </div>
   </div>
@@ -114,7 +114,7 @@
       formData.append('type', _self.parents('.is-up-file').data('type'));
 
       _self.find('.img-loading').removeClass('d-none');
-      axios.post('{{ front_route('upload.images') }}', formData, {}).then(function (res) {
+      axios.post(urls.upload_images, formData, {}).then(function (res) {
         let val = res.data.value;
         let url = res.data.url;
         let item = '<div class="img-upload-item wh-80 position-relative d-flex justify-content-center rounded overflow-hidden align-items-center border border-1 mb-1 me-1">';

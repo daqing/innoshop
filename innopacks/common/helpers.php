@@ -130,6 +130,55 @@ if (! function_exists('is_mobile')) {
     }
 }
 
+if (! function_exists('is_wechat_official')) {
+    /**
+     * Check if current is WeChat official by user agent.
+     *
+     * @return bool
+     */
+    function is_wechat_official(): bool
+    {
+        $userAgent = request()->userAgent();
+        if (str_contains($userAgent, 'MicroMessenger')) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
+if (! function_exists('is_wechat_mini')) {
+    /**
+     * Check if current is WeChat official by user agent.
+     *
+     * @return bool
+     */
+    function is_wechat_mini(): bool
+    {
+        if (request()->header('platform') == 'miniprogram') {
+            return true;
+        }
+        $userAgent = request()->userAgent();
+        if (str_contains($userAgent, 'wxwork') || str_contains($userAgent, 'wxlite') || str_contains($userAgent, 'miniprogram')) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
+if (! function_exists('is_app')) {
+    /**
+     * Check if current is APP by request.
+     *
+     * @return bool
+     */
+    function is_app(): bool
+    {
+        return (bool) request()->header('from_app', false);
+    }
+}
+
 if (! function_exists('installed')) {
     /**
      * Check installed by DB connection.
@@ -238,6 +287,19 @@ if (! function_exists('setting_locale_code')) {
     }
 }
 
+if (! function_exists('language_codes')) {
+    /**
+     * 获取语言包列表
+     * @return array
+     */
+    function language_codes(): array
+    {
+        $languageDir = lang_path();
+
+        return array_values(array_diff(scandir($languageDir), ['..', '.', '.DS_Store']));
+    }
+}
+
 if (! function_exists('front_locale_code')) {
     /**
      * Get current locale code.
@@ -284,6 +346,21 @@ if (! function_exists('current_locale')) {
     }
 }
 
+if (! function_exists('front_locale_direction')) {
+    /**
+     * Get locale direction for frontend.
+     *
+     * @return string
+     */
+    function front_locale_direction(): string
+    {
+        $localeCode = front_locale_code();
+        $rtlCodes   = array_keys(LocaleRepo::getRtlLanguages());
+
+        return in_array($localeCode, $rtlCodes) ? 'rtl' : 'ltr';
+    }
+}
+
 if (! function_exists('front_lang_path_codes')) {
     /**
      * Get all panel languages
@@ -292,27 +369,40 @@ if (! function_exists('front_lang_path_codes')) {
      */
     function front_lang_path_codes(): array
     {
-        $languageDir = front_lang_dir();
+        $packages = language_codes();
 
-        return array_values(array_diff(scandir($languageDir), ['..', '.', '.DS_Store']));
+        $panelLangCodes = collect($packages)->filter(function ($code) {
+            return file_exists(lang_path("{$code}/front"));
+        })->toArray();
+
+        return array_values($panelLangCodes);
     }
 }
 
-if (! function_exists('front_lang_dir')) {
+if (! function_exists('front_trans')) {
     /**
-     * Get all panel languages
-     *
-     * @return string
+     * @param  $key
+     * @param  array  $replace
+     * @param  $locale
+     * @return mixed
      */
-    function front_lang_dir(): string
+    function front_trans($key = null, array $replace = [], $locale = null): mixed
     {
-        if (is_dir(lang_path('vendor/front'))) {
-            $languageDir = lang_path('vendor/front');
-        } else {
-            $languageDir = inno_path('front/lang');
-        }
+        return trans('front/'.$key, $replace, $locale);
+    }
+}
 
-        return $languageDir;
+if (! function_exists('theme_trans')) {
+    /**
+     * @param  $themeCode
+     * @param  null  $key
+     * @param  array  $replace
+     * @param  null  $locale
+     * @return mixed
+     */
+    function theme_trans($themeCode, $key = null, array $replace = [], $locale = null): mixed
+    {
+        return trans("theme-$themeCode::$key", $replace, $locale);
     }
 }
 
@@ -353,7 +443,7 @@ if (! function_exists('create_json_success')) {
      */
     function create_json_success($data = null): JsonResponse
     {
-        return json_success(trans('panel::common.created_success'), $data);
+        return json_success(panel_trans('common.saved_success'), $data);
     }
 }
 
@@ -364,7 +454,7 @@ if (! function_exists('read_json_success')) {
      */
     function read_json_success($data = null): JsonResponse
     {
-        return json_success(trans('panel::common.read_success'), $data);
+        return json_success(panel_trans('common.read_success'), $data);
     }
 }
 
@@ -375,7 +465,7 @@ if (! function_exists('update_json_success')) {
      */
     function update_json_success($data = null): JsonResponse
     {
-        return json_success(trans('panel::common.updated_success'), $data);
+        return json_success(panel_trans('common.updated_success'), $data);
     }
 }
 
@@ -386,7 +476,7 @@ if (! function_exists('delete_json_success')) {
      */
     function delete_json_success($data = null): JsonResponse
     {
-        return json_success(trans('panel::common.deleted_success'), $data);
+        return json_success(panel_trans('common.deleted_success'), $data);
     }
 }
 
@@ -397,7 +487,7 @@ if (! function_exists('submit_json_success')) {
      */
     function submit_json_success($data = null): JsonResponse
     {
-        return json_success(trans('panel::common.submitted_success'), $data);
+        return json_success(panel_trans('common.submitted_success'), $data);
     }
 }
 
@@ -699,7 +789,12 @@ if (! function_exists('current_currency')) {
      */
     function current_currency(): mixed
     {
-        return currencies()->where('code', current_currency_code())->first();
+        $currency = currencies()->where('code', current_currency_code())->first();
+        if ($currency) {
+            return $currency;
+        }
+
+        return currencies()->first();
     }
 }
 
@@ -799,6 +894,52 @@ if (! function_exists('theme_image')) {
     }
 }
 
+if (! function_exists('parse_filters')) {
+    /**
+     * @param  mixed  $params
+     * @return array
+     */
+    function parse_int_filters(mixed $params): array
+    {
+        if (is_array($params)) {
+            return $params;
+        }
+        $filters = explode('|', $params);
+
+        return array_filter($filters, function ($filter) {
+            return (int) ($filter) > 0;
+        });
+    }
+}
+
+if (! function_exists('parse_attr_filters')) {
+    /**
+     * @param  mixed  $params
+     * @return array|array[]
+     * @throws Exception
+     */
+    function parse_attr_filters(mixed $params): array
+    {
+        if (is_array($params)) {
+            return $params;
+        }
+
+        $attributes = explode('|', $params);
+
+        return array_map(function ($item) {
+            $itemArr = explode(':', $item);
+            if (count($itemArr) != 2) {
+                throw new \Exception('Invalid attribute parameters!');
+            }
+
+            return [
+                'attr'  => $itemArr[0],
+                'value' => explode(',', $itemArr[1]),
+            ];
+        }, $attributes);
+    }
+}
+
 if (! function_exists('innoshop_version')) {
     /**
      * Generate an asset path for the application.
@@ -831,5 +972,31 @@ if (! function_exists('to_sql')) {
         }
 
         return $sql;
+    }
+}
+
+if (! function_exists('parsedown')) {
+    /**
+     * @param  string|null  $value
+     * @param  bool|null  $inline
+     * @return Parsedown|string
+     */
+    function parsedown(?string $value = null, ?bool $inline = null): Parsedown|string
+    {
+        $parser = new Parsedown;
+
+        if (! func_num_args()) {
+            return $parser;
+        }
+
+        if (is_null($inline)) {
+            $inline = config('parsedown.inline');
+        }
+
+        if ($inline) {
+            return $parser->line($value);
+        }
+
+        return $parser->text($value);
     }
 }

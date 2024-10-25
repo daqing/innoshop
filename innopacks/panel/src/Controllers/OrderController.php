@@ -28,7 +28,8 @@ class OrderController extends BaseController
     {
         $filters = $request->all();
         $data    = [
-            'orders' => OrderRepo::getInstance()->list($filters),
+            'criteria' => OrderRepo::getCriteria(),
+            'orders'   => OrderRepo::getInstance()->list($filters),
         ];
 
         return inno_view('panel::orders.index', $data);
@@ -82,7 +83,7 @@ class OrderController extends BaseController
         try {
             OrderRepo::getInstance()->destroy($order);
 
-            return back()->with('success', trans('panel::common.deleted_success'));
+            return back()->with('success', panel_trans('common.deleted_success'));
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
@@ -100,7 +101,7 @@ class OrderController extends BaseController
         try {
             StateMachineService::getInstance($order)->changeStatus($status, $comment, true);
 
-            return json_success(trans('panel::common.updated_success'));
+            return json_success(panel_trans('common.updated_success'));
         } catch (Exception $e) {
             return json_fail($e->getMessage());
         }

@@ -10,6 +10,7 @@
 namespace InnoShop\Front\Controllers;
 
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use InnoShop\Common\Models\Category;
@@ -22,6 +23,7 @@ class CategoryController extends Controller
     /**
      * @param  Request  $request
      * @return mixed
+     * @throws Exception
      */
     public function index(Request $request): mixed
     {
@@ -81,14 +83,18 @@ class CategoryController extends Controller
             $filters = [
                 'category_id' => $category->id,
                 'keyword'     => $keyword,
+                'sort'        => \request('sort'),
+                'order'       => \request('order'),
+                'per_page'    => \request('per_page'),
             ];
-            $products = ProductRepo::getInstance()->withActive()->builder($filters)->paginate();
+            $products = ProductRepo::getInstance()->getFrontList($filters);
 
             $data = [
-                'slug'       => $slug,
-                'category'   => $category,
-                'categories' => $categories,
-                'products'   => $products,
+                'slug'           => $slug,
+                'category'       => $category,
+                'categories'     => $categories,
+                'products'       => $products,
+                'per_page_items' => CategoryRepo::getInstance()->getPerPageItems(),
             ];
 
             return inno_view('categories.show', $data)->render();

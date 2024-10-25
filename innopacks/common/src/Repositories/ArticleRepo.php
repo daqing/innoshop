@@ -16,6 +16,18 @@ use InnoShop\Common\Models\Article;
 class ArticleRepo extends BaseRepo
 {
     /**
+     * @return array[]
+     */
+    public static function getCriteria(): array
+    {
+        return [
+            ['name' => 'title', 'type' => 'input', 'label' => trans('panel/article.title')],
+            ['name' => 'catalog', 'type' => 'input', 'label' => trans('panel/article.catalog')],
+            ['name' => 'slug', 'type' => 'input', 'label' => trans('panel/common.slug')],
+        ];
+    }
+
+    /**
      * @param  array  $filters
      * @return LengthAwarePaginator
      * @throws \Exception
@@ -56,6 +68,13 @@ class ArticleRepo extends BaseRepo
             $builder->where('catalog_id', $catalogId);
         }
 
+        $catalog = $filters['catalog'] ?? '';
+        if ($catalog) {
+            $builder->whereHas('catalog.translation', function (Builder $query) use ($catalog) {
+                $query->where('title', 'like', "%$catalog%");
+            });
+        }
+
         $tagId = $filters['tag_id'] ?? 0;
         if ($tagId) {
             $builder->whereHas('tags', function (Builder $query) use ($tagId) {
@@ -64,6 +83,13 @@ class ArticleRepo extends BaseRepo
                 } else {
                     $query->where('tag_id', $tagId);
                 }
+            });
+        }
+
+        $title = $filters['title'] ?? '';
+        if ($title) {
+            $builder->whereHas('translation', function (Builder $query) use ($title) {
+                $query->where('title', 'like', "%$title%");
             });
         }
 

@@ -2,7 +2,7 @@
 @section('body-class', 'page-brands')
 
 @section('content')
-<x-front-breadcrumb type="route" value="brands.index" title="{{ __('front::product.brand') }}" />
+<x-front-breadcrumb type="route" value="brands.index" title="{{ __('front/product.brand') }}" />
 
 @hookinsert('brand.index.top')
 
@@ -34,3 +34,8 @@
 @hookinsert('brand.index.bottom')
 
 @endsection
+@push('footer')
+<script>
+
+</script>
+@endpush
